@@ -1,0 +1,125 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>health.matchbox</groupId>
+    <artifactId>matchbox-int-tests</artifactId>
+    <version>1.0.0</version>
+
+    <name>Integration tests for matchbox</name>
+    <description>
+        This project contains a JUnit test bench for matchbox.
+    </description>
+    <url>https://matchbox.health</url>
+    <organization>
+        <name>ahdis ag</name>
+        <url>https://ahdis.ch</url>
+    </organization>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <java.version>20</java.version>
+
+        <junit_version>5.10.0</junit_version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>health.matchbox</groupId>
+                <artifactId>matchbox</artifactId>
+                <version>${matchbox.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <dependencies>
+        <dependency>
+            <groupId>health.matchbox</groupId>
+            <artifactId>matchbox-engine</artifactId>
+            <version>${matchbox.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>health.matchbox</groupId>
+            <artifactId>matchbox-server</artifactId>
+            <version>${matchbox.version}</version>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>health.matchbox</groupId>
+            <artifactId>matchbox-server</artifactId>
+            <version>${matchbox.version}</version>
+            <type>pom</type>
+        </dependency>
+
+        <dependency>
+            <groupId>org.thymeleaf</groupId>
+            <artifactId>thymeleaf</artifactId>
+            <version>3.0.14.RELEASE</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-params</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.11.0</version>
+                <configuration>
+                    <release>${java.version}</release>
+                    <encoding>${project.build.sourceEncoding}</encoding>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>dev</id>
+            <properties>
+                <matchbox.version>3.3.1</matchbox.version>
+            </properties>
+        </profile>
+    </profiles>
+
+    <issueManagement>
+        <system>GitHub</system>
+        <url>https://github.com/ahdis/matchbox-int-tests/issues</url>
+    </issueManagement>
+
+    <licenses>
+        <license>
+            <name>The Apache License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+
+    <scm>
+        <connection>scm:git:git://github.com/ahdis/matchbox-int-tests.git</connection>
+        <url>https://github.com/ahdis/matchbox-int-tests/tree/master</url>
+        <developerConnection>scm:git:ssh://github.com:ahdis/matchbox-int-tests.git</developerConnection>
+    </scm>
+</project>
