@@ -137,19 +137,19 @@ hapi:
       fhir_r4_core:
         name: hl7.fhir.r4.core
         version: 4.0.1
-        url: classpath:/igs/hl7.fhir.r4.core.tgz
+        url: classpath:/hl7.fhir.r4.core.tgz
       fhir_terminology:
         name: hl7.terminology
         version: 5.0.0
-        url: classpath:/igs/hl7.terminology#5.1.0.tgz
+        url: classpath:/hl7.terminology#5.1.0.tgz
       fhir_extensions:
         name: hl7.fhir.uv.extensions.r4
         version: 1.0.0
-        url: classpath:/igs/hl7.fhir.uv.extensions.r4#1.0.0.tgz
+        url: classpath:/hl7.fhir.uv.extensions.r4#1.0.0.tgz
       cda-core:
         name: hl7.cda.uv.core
         version: 2.1.0-draft1
-        url: classpath:/igs/cda-core-2.0#2.1.0-cibuild.tgz
+        url: classpath:/cda-core-2.0#2.1.0-cibuild.tgz
       cda:
         name: ch.fhir.ig.cda-fhir-maps
         version: 0.3.0

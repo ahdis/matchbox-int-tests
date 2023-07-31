@@ -54,7 +54,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  **/
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
 @ContextConfiguration(classes = {Application.class})
-@ActiveProfiles("server-validate-r4")
+@ActiveProfiles("validate-r4")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Disabled("Integration tests will be moved in another repository")
 public class IgValidateR4Test {
