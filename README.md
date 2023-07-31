@@ -2,14 +2,8 @@
 
 This project contains a JUnit test bench for matchbox.
 
-This project expects the `matchbox` project directory in the same parent as this project, e.g.:
+This project expects the `matchbox` project to be installed in the local Maven directory, and the `matchbox-server`
+module must be installed without the `boot` Maven profile, i.e.:
+`mvn -DskipTests -P !boot install`
 
-```
-parent/
-   matchbox/
-      matchbox-engine/
-      matchbox-server/
-   matchbox-int-tests/
-```
-
-This project will use these sources to test matchbox (i.e. matchbox is not a Maven dependency here).
+Then, these tests must be run with the matchbox version as parameter: `mvn -Dmatchbox.version=3.1.1 test`
