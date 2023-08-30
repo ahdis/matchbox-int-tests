@@ -119,7 +119,7 @@
         <profile>
             <id>dev</id>
             <properties>
-                <matchbox.version>3.3.3</matchbox.version>
+                <matchbox.version>3.4.0</matchbox.version>
             </properties>
         </profile>
     </profiles>
