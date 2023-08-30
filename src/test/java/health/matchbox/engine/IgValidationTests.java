@@ -86,6 +86,10 @@ public class IgValidationTests {
 	public static Stream<Arguments> provideResources() throws Exception {
 		List<Arguments> arguments = new ArrayList<>();
 		for (final String ig : IGS) {
+			if (ig.contains("ch.fhir.ig.ch-emed")) {
+				// The IG contains unvalidatable examples
+				continue;
+			}
 			Map<String, byte[]> source = fetchByPackage(ig, true);
 			for (Map.Entry<String, byte[]> t : source.entrySet()) {
 				String fn = t.getKey();
