@@ -107,3 +107,4 @@ matchbox:
   fhir:
     context:
       txServer: n/a
+      onlyOneEngine: true

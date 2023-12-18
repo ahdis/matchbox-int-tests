@@ -1,7 +1,7 @@
 package health.matchbox.server;
 
 /**
- * Attention: if it is the first test run, an error about not connecting to port 8080 appears, running IgValidateR4
+ * Attention: if it is the first test run, an error about not connecting to port 8081 appears, running IgValidateR4
  * first works
  */
 
@@ -45,7 +45,7 @@ public class IgValidateRawProfileTest {
 
 	@BeforeAll
 	void waitUntilStartup() throws Exception {
-		Path dir = Paths.get("database");
+		final Path dir = Paths.get("database");
 		if (Files.exists(dir)) {
 			for (Path file : Files.list(dir).collect(Collectors.toList())) {
 				if (Files.isRegularFile(file)) {
@@ -53,9 +53,9 @@ public class IgValidateRawProfileTest {
 				}
 			}
 		}
-		Thread.sleep(20000); // give the server some time to start up
-		FhirContext contextR4 = FhirVersionEnum.R4.newContext();
-		ValidationClient validationClient = new ValidationClient(contextR4, this.targetServer);
+		Thread.sleep(30000); // give the server some time to start up
+		final FhirContext contextR4 = FhirVersionEnum.R4.newContext();
+		final var validationClient = new ValidationClient(contextR4, this.targetServer);
 		validationClient.capabilities();
 	}
 
