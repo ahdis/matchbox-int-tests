@@ -149,7 +149,7 @@ hapi:
         url: classpath:/hl7.fhir.uv.extensions.r4#1.0.0.tgz
       ch-emed:
         name: ch.fhir.ig.ch-emed
-        version: 4.0.0-ballot
+        version: 4.0.0
         url: https://fhir.ch/ig/ch-emed/package.tgz
 #      ch-vacd:
 #        name: ch.fhir.ig.ch-vacd
