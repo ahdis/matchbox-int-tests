@@ -6,4 +6,4 @@ This project expects the `matchbox` project to be installed in the local Maven d
 module must be installed without the `boot` Maven profile, i.e.:
 `mvn -DskipTests -P !boot install`
 
-Then, these tests must be run with the matchbox version as parameter: `mvn -Dmatchbox.version=3.4.5 test`
+Then, these tests must be run with the matchbox version as parameter: `mvn -Dmatchbox.version=3.5.2 test`
