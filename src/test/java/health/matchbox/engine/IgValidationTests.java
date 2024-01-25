@@ -38,9 +38,9 @@ public class IgValidationTests {
 	private static final Logger log = LoggerFactory.getLogger(IgValidationTests.class);
 	private static final List<String> IGS = List.of(
 		"/igs/ihe.formatcode.fhir#1.1.0.tgz",
-		"/igs/ch.fhir.ig.ch-epr-term#2.0.9.tgz",
-		"/igs/ch.fhir.ig.ch-core#4.0.0-ballot.tgz",
-		"/igs/ch.fhir.ig.ch-emed#4.0.0-ballot.tgz",
+		"/igs/ch.fhir.ig.ch-epr-term#2.0.10.tgz",
+		"/igs/ch.fhir.ig.ch-core#4.0.1.tgz",
+		"/igs/ch.fhir.ig.ch-emed#4.0.1.tgz",
 		"/igs/ch.cara.fhir.epr.emed#20230717.tgz"
 	);
 
