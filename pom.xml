@@ -20,7 +20,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>20</java.version>
 
-        <junit_version>5.10.0</junit_version>
+        <junit_version>5.10.2</junit_version>
     </properties>
 
     <dependencyManagement>
@@ -56,7 +56,7 @@
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>1.2.13</version>
+            <version>1.4.14</version>
         </dependency>
 
         <dependency>
@@ -124,7 +124,7 @@
         <profile>
             <id>dev</id>
             <properties>
-                <matchbox.version>3.5.3</matchbox.version>
+                <matchbox.version>3.6.0</matchbox.version>
             </properties>
         </profile>
     </profiles>
