@@ -41,7 +41,7 @@ public class IgValidationTests {
 		"/igs/ch.fhir.ig.ch-epr-term#2.0.10.tgz",
 		"/igs/ch.fhir.ig.ch-core#4.0.1.tgz",
 		"/igs/ch.fhir.ig.ch-emed#4.0.1.tgz",
-		"/igs/ch.cara.fhir.epr.emed#20230717.tgz"
+		"/igs/ch.cara.fhir.epr.emed#1.0.0.tgz"
 	);
 
 	private final MatchboxEngine engine;
@@ -57,6 +57,7 @@ public class IgValidationTests {
 	@ParameterizedTest(name = "{0}")
 	@MethodSource("provideResources")
 	void testValidate(final String name, final Resource resource) throws Exception {
+		log.info("Validating resource %s".formatted(name));
 		if (!resource.getMeta().hasProfile()) {
 			Assumptions.abort("No meta.profile found, unable to valide this resource");
 		}
@@ -65,7 +66,7 @@ public class IgValidationTests {
 
 		final List<OperationOutcome.OperationOutcomeIssueComponent> errors = outcome.getIssue().stream()
 			.filter(issue -> OperationOutcome.IssueSeverity.FATAL == issue.getSeverity() || OperationOutcome.IssueSeverity.ERROR == issue.getSeverity())
-			.collect(Collectors.toList());
+			.toList();
 
 		final Map<OperationOutcome.IssueSeverity, Long> count = outcome.getIssue().stream()
 			.map(OperationOutcome.OperationOutcomeIssueComponent::getSeverity)
@@ -86,10 +87,10 @@ public class IgValidationTests {
 	public static Stream<Arguments> provideResources() throws Exception {
 		List<Arguments> arguments = new ArrayList<>();
 		for (final String ig : IGS) {
-			if (ig.contains("ch.fhir.ig.ch-emed")) {
+			/*if (ig.contains("ch.fhir.ig.ch-emed")) {
 				// The IG contains unvalidatable examples
 				continue;
-			}
+			}*/
 			Map<String, byte[]> source = fetchByPackage(ig, true);
 			for (Map.Entry<String, byte[]> t : source.entrySet()) {
 				String fn = t.getKey();
@@ -114,13 +115,14 @@ public class IgValidationTests {
 
 
 	private static boolean exemptFile(String fn) {
-		return Utilities.existsInList(fn, "spec.internals", "version.info", "schematron.zip", "package.json",
-												// CH Core
-												"Patient-UpiEprTestKrcmarevic.json",
-												"Bundle-CdaContainingOriginalRepresentationAsPdfA.json",
-												"DocumentReference-Docu.json",
-												"Patient-PersonEch011.json"
-		);
+		if (Utilities.existsInList(fn, "spec.internals", "version.info", "schematron.zip", "package.json",
+											// CH EMED
+											"MedicationRequest-MedReq-ChangeMedication" // Should be contained in the PADV CHANGE
+		)) {
+			return true;
+		}
+
+		return fn.startsWith("Bundle-") || fn.startsWith("Composition-");
 	}
 
 	private static Map<String, byte[]> fetchByPackage(String src, boolean examples) throws Exception {

@@ -7,7 +7,7 @@ spring:
     check-location: false
     baselineOnMigrate: true
   datasource:
-    url: "jdbc:h2:file:./database/h2"
+    url: "jdbc:h2:mem:validate-raw"
     username: sa
     password: null
     driverClassName: org.h2.Driver
