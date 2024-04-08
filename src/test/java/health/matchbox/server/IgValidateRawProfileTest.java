@@ -45,14 +45,6 @@ public class IgValidateRawProfileTest {
 
 	@BeforeAll
 	void waitUntilStartup() throws Exception {
-		final Path dir = Paths.get("database");
-		if (Files.exists(dir)) {
-			for (Path file : Files.list(dir).collect(Collectors.toList())) {
-				if (Files.isRegularFile(file)) {
-					Files.delete(file);
-				}
-			}
-		}
 		Thread.sleep(30000); // give the server some time to start up
 		final FhirContext contextR4 = FhirVersionEnum.R4.newContext();
 		final var validationClient = new ValidationClient(contextR4, this.targetServer);

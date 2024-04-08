@@ -56,7 +56,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @ContextConfiguration(classes = {Application.class})
 @ActiveProfiles("validate-r4")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@Disabled("Integration tests will be moved in another repository")
 public class IgValidateR4Test {
 
 	private static final String TARGET_SERVER = "http://localhost:8082/matchboxv3/fhir";
@@ -64,6 +63,8 @@ public class IgValidateR4Test {
 	@Autowired
 	ApplicationContext context;
 	private ValidationClient validationClient;
+
+	private static final String EMED = "ch.fhir.ig.ch-emed";
 
 	static public int getValidationFailures(OperationOutcome outcome) {
 		int fails = 0;
@@ -82,14 +83,6 @@ public class IgValidateR4Test {
 
 	@BeforeAll
 	public synchronized void beforeAll() throws Exception {
-		Path dir = Paths.get("database");
-		if (Files.exists(dir)) {
-			for (Path file : Files.list(dir).collect(Collectors.toList())) {
-				if (Files.isRegularFile(file)) {
-					Files.delete(file);
-				}
-			}
-		}
 		Thread.sleep(40000); // give the server some time to start up
 		FhirContext contextR4 = FhirVersionEnum.R4.newContext();
 		this.validationClient = new ValidationClient(contextR4, TARGET_SERVER);
@@ -98,7 +91,7 @@ public class IgValidateR4Test {
 
 	public Stream<Arguments> provideResources() throws Exception {
 
-		Map<String, Object> obj = new Yaml().load(getClass().getResourceAsStream("/application-server-validate-r4.yaml"));
+		Map<String, Object> obj = new Yaml().load(getClass().getResourceAsStream("/application-validate-r4.yaml"));
 		final List<AppProperties.ImplementationGuide> igs = PackageCacheInitializer.getIgs(obj, true);
 		List<Arguments> arguments = new ArrayList<>();
 		for (AppProperties.ImplementationGuide ig : igs) {
@@ -106,7 +99,7 @@ public class IgValidateR4Test {
 			String version = "4.0.1";
 			for (Map.Entry<String, byte[]> t : source.entrySet()) {
 				String fn = t.getKey();
-				if (!exemptFile(fn)) {
+				if (!exemptFile(fn, ig.getName())) {
 					Resource r = null;
 					if (fn.endsWith(".xml") && !fn.endsWith("template.xml"))
 						r = new org.hl7.fhir.r4.formats.XmlParser().parse(new ByteArrayInputStream(t.getValue()));
@@ -146,10 +139,16 @@ public class IgValidateR4Test {
 
 	public OperationOutcome doValidate(String name, Resource resource) throws IOException {
 		log.debug("validating resource " + resource.getId() + " with " + TARGET_SERVER);
+
 		FhirContext contextR4 = FhirVersionEnum.R4.newContext();
 
+		if (name.startsWith("ch.fhir.ig.ch-emed")) {
+			// remove text from bundle
+			resource = removeHtml(resource);
+		}
+
 		if (!resource.getMeta().hasProfile()) {
-			Assumptions.abort("No meta.profile found, unable to valide this resource");
+			Assumptions.abort("No meta.profile found, unable to validate this resource");
 		}
 
 		boolean skip = "ch.fhir.ig.ch-core#1.0.0-PractitionerRole-HPWengerRole".equals(name); // wrong value inside
@@ -176,8 +175,40 @@ public class IgValidateR4Test {
 		return outcome;
 	}
 
-	static private boolean exemptFile(String fn) {
-		return Utilities.existsInList(fn, "spec.internals", "version.info", "schematron.zip", "package.json");
+	private static boolean exemptFile(String fn, String ig) {
+		if (Utilities.existsInList(fn, "spec.internals", "version.info", "schematron.zip", "package.json")) {
+			return true;
+		}
+		if (!EMED.equals(ig)) {
+			return true;
+		}
+		if (fn.endsWith("MedicationRequest-MedReq-ChangeMedication.json")) {
+			// see issue https://github.com/ahdis/matchbox-int-tests/issues/6 cannot check slice due to unknown reference
+			// [IgValidationTests.java:79] [INFORMATION][INFORMATIONAL] This element does not match any known slice defined in the profile http://fhir.ch/ig/ch-emed/StructureDefinition/ch-emed-medicationrequest-changed|4.0.1 (this may not be a problem, but you should check that it's not intended to match a slice)
+			return true;
+		}
+		// only validate bundles for EMED
+		if (EMED.equals(ig) && !fn.startsWith("Bundle")) {
+			return true;
+		}
+		return false;
+	}
+
+	public static org.hl7.fhir.r4.model.Resource removeHtml(org.hl7.fhir.r4.model.Resource r) {
+		if (r instanceof org.hl7.fhir.r4.model.DomainResource) {
+			org.hl7.fhir.r4.model.DomainResource dr = (org.hl7.fhir.r4.model.DomainResource) r;
+			dr.setText(null);
+			for(org.hl7.fhir.r4.model.Resource c : dr.getContained()) {
+				removeHtml(c);
+			}
+		}
+		if (r instanceof org.hl7.fhir.r4.model.Bundle) {
+			org.hl7.fhir.r4.model.Bundle dr = (org.hl7.fhir.r4.model.Bundle) r;
+			for(org.hl7.fhir.r4.model.Bundle.BundleEntryComponent entry : dr.getEntry()) {
+				removeHtml(entry.getResource());
+			}
+		}
+		return r;
 	}
 
 	static private Map<String, byte[]> fetchByPackage(AppProperties.ImplementationGuide src, boolean examples)

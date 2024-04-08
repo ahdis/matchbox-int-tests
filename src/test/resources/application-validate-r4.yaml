@@ -7,13 +7,11 @@ spring:
     check-location: false
     baselineOnMigrate: true
   datasource:
-    url: "jdbc:h2:file:./database/h2_test_ch"
+    url: "jdbc:h2:mem:validate-r4"
     username: sa
     password: null
     driverClassName: org.h2.Driver
     max-active: 15
-
-    # database connection pool size
     hikari:
       maximum-pool-size: 10
   jpa:
@@ -21,26 +19,8 @@ spring:
       hibernate.format_sql: false
       hibernate.show_sql: false
       hibernate.dialect: ca.uhn.fhir.jpa.model.dialect.HapiFhirH2Dialect
-      #      hibernate.hbm2ddl.auto: update
-      #      hibernate.jdbc.batch_size: 20
-      #      hibernate.cache.use_query_cache: false
-      #      hibernate.cache.use_second_level_cache: false
-      #      hibernate.cache.use_structured_entries: false
-      #      hibernate.cache.use_minimal_puts: false
-      ###    These settings will enable fulltext search with lucene
-      hibernate:
-        search:
-          enabled: true
-          backend:
-            directory:
-              type: local-heap
-              locking:
-                strategy: none
-  #      hibernate.search.backend.type: lucene
-  #      hibernate.search.backend.analysis.configurer: ca.uhn.fhir.jpa.search.HapiLuceneAnalysisConfigurer
-  #      hibernate.search.backend.directory.type: local-filesystem
-  #      hibernate.search.backend.directory.root: target/lucenefiles
-  #      hibernate.search.backend.lucene_version: lucene_current
+      hibernate.search.enabled: true
+      hibernate.search.backend.lucene_version: LUCENE_CURRENT
   batch:
     job:
       enabled: false
@@ -186,5 +166,6 @@ hapi:
 matchbox:
   fhir:
     context:
-      #txServer: http://tx.fhir.org
-      txServer: n/a
+#      txServer: http://localhost:${server.port}/matchboxv3/fhir
+      txServer: http://tx.fhir.org
+#      txServer: n/a
