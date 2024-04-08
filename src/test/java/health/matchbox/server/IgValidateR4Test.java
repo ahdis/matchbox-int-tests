@@ -65,6 +65,7 @@ public class IgValidateR4Test {
 	private ValidationClient validationClient;
 
 	private static final String EMED = "ch.fhir.ig.ch-emed";
+	private static final String ELM = "ch.fhir.ig.ch-elm";
 
 	static public int getValidationFailures(OperationOutcome outcome) {
 		int fails = 0;
@@ -147,20 +148,24 @@ public class IgValidateR4Test {
 			resource = removeHtml(resource);
 		}
 
-		if (!resource.getMeta().hasProfile()) {
-			Assumptions.abort("No meta.profile found, unable to validate this resource");
-		}
-
-		boolean skip = "ch.fhir.ig.ch-core#1.0.0-PractitionerRole-HPWengerRole".equals(name); // wrong value inside
-		skip = skip || "ch.fhir.ig.ch-epr-mhealth#0.1.2-Bundle-2-7-BundleProvideDocument".equals(name); // error in testcase, however cannot reproduce yet directly ???
-		if (skip) {
-			Assumptions.abort("Ignoring validation for " + name);
-		}
-
 		String content = new org.hl7.fhir.r4.formats.JsonParser().composeString(resource);
-		OperationOutcome outcome = (OperationOutcome) this.validationClient.validate(content,
-																											  resource.getMeta().getProfile().get(0).getValue());
+		String profile = null;
 
+		if (name.startsWith("ch.fhir.ig.ch-elm")) {
+			if (resource.getResourceType() == org.hl7.fhir.r4.model.ResourceType.Bundle) {
+				profile = "http://fhir.ch/ig/ch-elm/StructureDefinition/ch-elm-document-strict";
+			} 
+			if (resource.getResourceType() == org.hl7.fhir.r4.model.ResourceType.DocumentReference) {
+				profile = "http://fhir.ch/ig/ch-elm/StructureDefinition/PublishDocumentReferenceStrict";
+			} 
+			if (profile == null) {
+				Assumptions.abort("Ignoring validation for " + name +" since no profile found");
+			}
+		} else {		
+			profile = resource.getMeta().getProfile().get(0).getValue();
+		}
+
+		OperationOutcome outcome = (OperationOutcome) this.validationClient.validate(content, profile);
 		if (outcome == null) {
 			log.debug(contextR4.newXmlParser().encodeResourceToString(resource));
 			log.error("should have a return element");
@@ -179,16 +184,23 @@ public class IgValidateR4Test {
 		if (Utilities.existsInList(fn, "spec.internals", "version.info", "schematron.zip", "package.json")) {
 			return true;
 		}
-		if (!EMED.equals(ig)) {
-			return true;
-		}
-		if (fn.endsWith("MedicationRequest-MedReq-ChangeMedication.json")) {
-			// see issue https://github.com/ahdis/matchbox-int-tests/issues/6 cannot check slice due to unknown reference
-			// [IgValidationTests.java:79] [INFORMATION][INFORMATIONAL] This element does not match any known slice defined in the profile http://fhir.ch/ig/ch-emed/StructureDefinition/ch-emed-medicationrequest-changed|4.0.1 (this may not be a problem, but you should check that it's not intended to match a slice)
+		if (!ELM.equals(ig)) {
 			return true;
 		}
 		// only validate bundles for EMED
-		if (EMED.equals(ig) && !fn.startsWith("Bundle")) {
+		if (ELM.equals(ig) && !(fn.startsWith("Bundle") || fn.startsWith("DocumentReference"))) {
+			return true;
+		}
+		if (ELM.equals(ig) && (fn.startsWith("Bundle-ex-findDocumentReferencesResponse"))) {
+			return true;
+		}
+		if (ELM.equals(ig) && (fn.startsWith("DocumentReference-1-DocumentReferenceResponseFailed"))) {
+			return true;
+		}
+		if (ELM.equals(ig) && (fn.startsWith("DocumentReference-1-DocumentReferenceResponseCompleted"))) {
+			return true;
+		}
+		if (ELM.equals(ig) && (fn.startsWith("DocumentReference-1-DocumentReferenceResponseInProgress"))) {
 			return true;
 		}
 		return false;
