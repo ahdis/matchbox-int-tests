@@ -56,7 +56,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @ContextConfiguration(classes = {Application.class})
 @ActiveProfiles("validate-r4")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@Disabled("Integration tests will be moved in another repository")
 public class IgValidateR4Test {
 
 	private static final String TARGET_SERVER = "http://localhost:8082/matchboxv3/fhir";
@@ -64,6 +63,9 @@ public class IgValidateR4Test {
 	@Autowired
 	ApplicationContext context;
 	private ValidationClient validationClient;
+
+	private static final String EMED = "ch.fhir.ig.ch-emed";
+	private static final String ELM = "ch.fhir.ig.ch-elm";
 
 	static public int getValidationFailures(OperationOutcome outcome) {
 		int fails = 0;
@@ -82,14 +84,6 @@ public class IgValidateR4Test {
 
 	@BeforeAll
 	public synchronized void beforeAll() throws Exception {
-		Path dir = Paths.get("database");
-		if (Files.exists(dir)) {
-			for (Path file : Files.list(dir).collect(Collectors.toList())) {
-				if (Files.isRegularFile(file)) {
-					Files.delete(file);
-				}
-			}
-		}
 		Thread.sleep(40000); // give the server some time to start up
 		FhirContext contextR4 = FhirVersionEnum.R4.newContext();
 		this.validationClient = new ValidationClient(contextR4, TARGET_SERVER);
@@ -98,7 +92,7 @@ public class IgValidateR4Test {
 
 	public Stream<Arguments> provideResources() throws Exception {
 
-		Map<String, Object> obj = new Yaml().load(getClass().getResourceAsStream("/application-server-validate-r4.yaml"));
+		Map<String, Object> obj = new Yaml().load(getClass().getResourceAsStream("/application-validate-r4.yaml"));
 		final List<AppProperties.ImplementationGuide> igs = PackageCacheInitializer.getIgs(obj, true);
 		List<Arguments> arguments = new ArrayList<>();
 		for (AppProperties.ImplementationGuide ig : igs) {
@@ -106,7 +100,7 @@ public class IgValidateR4Test {
 			String version = "4.0.1";
 			for (Map.Entry<String, byte[]> t : source.entrySet()) {
 				String fn = t.getKey();
-				if (!exemptFile(fn)) {
+				if (!exemptFile(fn, ig.getName())) {
 					Resource r = null;
 					if (fn.endsWith(".xml") && !fn.endsWith("template.xml"))
 						r = new org.hl7.fhir.r4.formats.XmlParser().parse(new ByteArrayInputStream(t.getValue()));
@@ -146,22 +140,32 @@ public class IgValidateR4Test {
 
 	public OperationOutcome doValidate(String name, Resource resource) throws IOException {
 		log.debug("validating resource " + resource.getId() + " with " + TARGET_SERVER);
+
 		FhirContext contextR4 = FhirVersionEnum.R4.newContext();
 
-		if (!resource.getMeta().hasProfile()) {
-			Assumptions.abort("No meta.profile found, unable to valide this resource");
-		}
-
-		boolean skip = "ch.fhir.ig.ch-core#1.0.0-PractitionerRole-HPWengerRole".equals(name); // wrong value inside
-		skip = skip || "ch.fhir.ig.ch-epr-mhealth#0.1.2-Bundle-2-7-BundleProvideDocument".equals(name); // error in testcase, however cannot reproduce yet directly ???
-		if (skip) {
-			Assumptions.abort("Ignoring validation for " + name);
+		if (name.startsWith("ch.fhir.ig.ch-emed")) {
+			// remove text from bundle
+			resource = removeHtml(resource);
 		}
 
 		String content = new org.hl7.fhir.r4.formats.JsonParser().composeString(resource);
-		OperationOutcome outcome = (OperationOutcome) this.validationClient.validate(content,
-																											  resource.getMeta().getProfile().get(0).getValue());
+		String profile = null;
 
+		if (name.startsWith("ch.fhir.ig.ch-elm")) {
+			if (resource.getResourceType() == org.hl7.fhir.r4.model.ResourceType.Bundle) {
+				profile = "http://fhir.ch/ig/ch-elm/StructureDefinition/ch-elm-document-strict";
+			} 
+			if (resource.getResourceType() == org.hl7.fhir.r4.model.ResourceType.DocumentReference) {
+				profile = "http://fhir.ch/ig/ch-elm/StructureDefinition/PublishDocumentReferenceStrict";
+			} 
+			if (profile == null) {
+				Assumptions.abort("Ignoring validation for " + name +" since no profile found");
+			}
+		} else {		
+			profile = resource.getMeta().getProfile().get(0).getValue();
+		}
+
+		OperationOutcome outcome = (OperationOutcome) this.validationClient.validate(content, profile);
 		if (outcome == null) {
 			log.debug(contextR4.newXmlParser().encodeResourceToString(resource));
 			log.error("should have a return element");
@@ -176,8 +180,47 @@ public class IgValidateR4Test {
 		return outcome;
 	}
 
-	static private boolean exemptFile(String fn) {
-		return Utilities.existsInList(fn, "spec.internals", "version.info", "schematron.zip", "package.json");
+	private static boolean exemptFile(String fn, String ig) {
+		if (Utilities.existsInList(fn, "spec.internals", "version.info", "schematron.zip", "package.json")) {
+			return true;
+		}
+		if (!ELM.equals(ig)) {
+			return true;
+		}
+		// only validate bundles for EMED
+		if (ELM.equals(ig) && !(fn.startsWith("Bundle") || fn.startsWith("DocumentReference"))) {
+			return true;
+		}
+		if (ELM.equals(ig) && (fn.startsWith("Bundle-ex-findDocumentReferencesResponse"))) {
+			return true;
+		}
+		if (ELM.equals(ig) && (fn.startsWith("DocumentReference-1-DocumentReferenceResponseFailed"))) {
+			return true;
+		}
+		if (ELM.equals(ig) && (fn.startsWith("DocumentReference-1-DocumentReferenceResponseCompleted"))) {
+			return true;
+		}
+		if (ELM.equals(ig) && (fn.startsWith("DocumentReference-1-DocumentReferenceResponseInProgress"))) {
+			return true;
+		}
+		return false;
+	}
+
+	public static org.hl7.fhir.r4.model.Resource removeHtml(org.hl7.fhir.r4.model.Resource r) {
+		if (r instanceof org.hl7.fhir.r4.model.DomainResource) {
+			org.hl7.fhir.r4.model.DomainResource dr = (org.hl7.fhir.r4.model.DomainResource) r;
+			dr.setText(null);
+			for(org.hl7.fhir.r4.model.Resource c : dr.getContained()) {
+				removeHtml(c);
+			}
+		}
+		if (r instanceof org.hl7.fhir.r4.model.Bundle) {
+			org.hl7.fhir.r4.model.Bundle dr = (org.hl7.fhir.r4.model.Bundle) r;
+			for(org.hl7.fhir.r4.model.Bundle.BundleEntryComponent entry : dr.getEntry()) {
+				removeHtml(entry.getResource());
+			}
+		}
+		return r;
 	}
 
 	static private Map<String, byte[]> fetchByPackage(AppProperties.ImplementationGuide src, boolean examples)

@@ -13,11 +13,11 @@ jobs:
       - name: Checkout matchbox
         uses: actions/checkout@v3
 
-      - name: Setup Java 20
+      - name: Setup Java 21
         uses: actions/setup-java@v3
         # https://github.com/actions/setup-java#usage
         with:
-          java-version: "20"
+          java-version: "21"
           distribution: "zulu"
           cache: "maven"
 
