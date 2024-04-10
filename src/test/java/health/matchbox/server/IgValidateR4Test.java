@@ -25,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.context.ApplicationContext;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.yaml.snakeyaml.Yaml;
@@ -56,6 +57,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @ContextConfiguration(classes = {Application.class})
 @ActiveProfiles("validate-r4")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@DirtiesContext
 public class IgValidateR4Test {
 
 	private static final String TARGET_SERVER = "http://localhost:8082/matchboxv3/fhir";
