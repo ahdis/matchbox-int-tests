@@ -122,7 +122,7 @@
         <profile>
             <id>dev</id>
             <properties>
-                <matchbox.version>3.8.0</matchbox.version>
+                <matchbox.version>3.8.3</matchbox.version>
             </properties>
         </profile>
     </profiles>
