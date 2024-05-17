@@ -132,7 +132,7 @@ hapi:
 #        version: 4.0.1
       ch-elm:
         name: ch.fhir.ig.ch-elm
-        version: 1.2.0
+        version: 1.3.0
         url: https://fhir.ch/ig/ch-elm/package.tgz
 #      ch-vacd:
 #        name: ch.fhir.ig.ch-vacd
