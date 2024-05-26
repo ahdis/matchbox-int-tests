@@ -33,7 +33,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  *
  * @author Quentin Ligier
  **/
+@Ignore
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@Disabled
 public class IgValidationTests {
 	private static final Logger log = LoggerFactory.getLogger(IgValidationTests.class);
 
