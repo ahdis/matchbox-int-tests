@@ -27,13 +27,13 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.Disabled;
 
 /**
  * A test bench to load IGs in matchbox-engine and validate all their examples.
  *
  * @author Quentin Ligier
  **/
-@Ignore
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Disabled
 public class IgValidationTests {
