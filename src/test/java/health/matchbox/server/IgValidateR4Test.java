@@ -228,6 +228,9 @@ public class IgValidateR4Test {
 	static private Map<String, byte[]> fetchByPackage(AppProperties.ImplementationGuide src, boolean examples)
 		throws Exception {
 		String thePackageUrl = src.getUrl();
+		if (thePackageUrl==null) {
+			return new HashMap<String, byte[]>();
+		}
 		PackageLoaderSvc loader = new PackageLoaderSvc();
 		InputStream inputStream = new ByteArrayInputStream(loader.loadPackageUrlContents(thePackageUrl));
 		NpmPackage pi = NpmPackage.fromPackage(inputStream, null, true);
