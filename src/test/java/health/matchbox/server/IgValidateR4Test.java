@@ -2,19 +2,29 @@ package health.matchbox.server;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.jpa.packages.loader.PackageLoaderSvc;
 import ca.uhn.fhir.jpa.starter.AppProperties;
 import ca.uhn.fhir.jpa.starter.Application;
 import ch.ahdis.matchbox.util.PackageCacheInitializer;
 import health.matchbox.util.ValidationClient;
+
+import org.hl7.fhir.DomainResource;
+import org.hl7.fhir.exceptions.FHIRFormatError;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.OperationOutcome;
+import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.TestScript.TestActionComponent;
+import org.hl7.fhir.r4.model.TestScript;
+import org.hl7.fhir.r4.model.TestScript.TestScriptTestComponent;
 import org.hl7.fhir.utilities.TextFile;
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.utilities.npm.NpmPackage;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Named;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -28,25 +38,34 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
+import org.w3._1999.xhtml.A;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
+
+import org.apache.commons.codec.binary.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
- * see https://www.baeldung.com/springjunit4classrunner-parameterized read the implementation guides defined in ig and
+ * see https://www.baeldung.com/springjunit4classrunner-parameterized read the
+ * implementation guides defined in ig and
  * execute the validations
  * <p>
  * It uses the port 8082.
@@ -54,7 +73,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * @author oliveregger
  **/
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
-@ContextConfiguration(classes = {Application.class})
+@ContextConfiguration(classes = { Application.class })
 @ActiveProfiles("validate-r4")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @DirtiesContext
@@ -113,7 +132,35 @@ public class IgValidateR4Test {
 					else
 						throw new Exception("Unsupported format for " + fn);
 					if (r != null) {
-						arguments.add(Arguments.of(ig.getName() + "-" + r.getResourceType() + "-" + r.getId(), r));
+						if (r instanceof TestScript) {
+							TestScript testScript = (TestScript) r;
+							testScript.getFixture().forEach(fixture -> {
+								if (fixture.getResource() != null && fixture.getResource().getReference() != null) {
+									String ref = fixture.getResource().getReference();
+									Resource resource = null;
+									if (!ref.startsWith("http") || !ref.startsWith("#") || !ref.startsWith("urn")) {
+											String refchangelink = ref.replace("/", "-")+".json";
+											resource = source.entrySet().stream()
+													.filter(e -> e.getKey().equals(refchangelink)).map(e -> {
+														try {
+															return new org.hl7.fhir.r4.formats.JsonParser()
+																	.parse(new ByteArrayInputStream(e.getValue()));
+														} catch (FHIRFormatError | IOException e1) {
+															log.error("error parsing " + e.getKey(), e1);
+															return null;
+														}
+													}).findFirst().get();
+										if (resource != null) {
+											resource.setId(fixture.getId());
+											testScript.getContained().add(resource);
+											fixture.getResource().setReference("#" + fixture.getId());
+										}
+									}
+								}
+							});
+						}
+						String name = ig.getName() + "-" + r.getResourceType() + "-" + r.getId();
+						arguments.add(Arguments.of(name, r));
 					}
 				}
 			}
@@ -121,23 +168,89 @@ public class IgValidateR4Test {
 		return arguments.stream();
 	}
 
+	
 	@ParameterizedTest(name = "{0}")
 	@MethodSource("provideResources")
 	public void testValidate(String name, Resource resource) throws Exception {
+		if (resource instanceof TestScript) {
+			runTestScript(name, (TestScript) resource);
+			return ;
+		}
 		OperationOutcome outcome = doValidate(name, resource);
 		int fails = getValidationFailures(outcome);
 		if (fails > 0) {
 			log.error("failing " + name);
 			for (final var issue : outcome.getIssue()) {
 				log.debug(String.format("  [%s][%s] %s",
-												issue.getSeverity().name(),
-												issue.getCode().name(),
-												issue.getDiagnostics()));
+						issue.getSeverity().name(),
+						issue.getCode().name(),
+						issue.getDiagnostics()));
 			}
-			//log.debug(contextR4.newJsonParser().encodeResourceToString(resource));
-			//log.debug(contextR4.newJsonParser().encodeResourceToString(outcome));
+			// log.debug(contextR4.newJsonParser().encodeResourceToString(resource));
+			// log.debug(contextR4.newJsonParser().encodeResourceToString(outcome));
 		}
 		assertEquals(0, fails);
+	}
+
+	public OperationOutcome validate(TestScript resource, TestActionComponent action) throws IOException {
+		String content = null;
+		String reference = action.getOperation().getSourceId();
+		Resource input = resource.getContained().stream().filter(r -> r.getId().equals(reference)).findFirst().get();
+		if (input instanceof Binary) {
+			content = new String(((Binary) input).getData(), StandardCharsets.UTF_8);
+		} else {
+			content = new org.hl7.fhir.r4.formats.JsonParser().composeString(input);
+		}
+		String params = action.getOperation().getParams();
+		String profile = null;
+		Optional<String> optProfile = Arrays.stream(params.split("&")).filter(p -> p.startsWith("profile=")).map(e -> e.substring(8)).findFirst();
+		if (optProfile.isPresent()) {
+			profile = optProfile.get();
+		} else {
+			fail("missing profile parameter in params " + params);
+		}
+		OperationOutcome outcome = (OperationOutcome) this.validationClient.validate(content, profile);
+		return outcome;
+	}
+
+	public void runTestScript(String name, TestScript resource) throws Exception {
+		// for each test in resource run the test
+		FhirContext contextR4 = FhirVersionEnum.R4.newContextCached();
+		IFhirPath fhirPath = contextR4.newFhirPath();
+		Resource response = null;		
+		String responseInJson = null;
+		for (TestScriptTestComponent test: resource.getTest()) {
+			for (TestActionComponent action: test.getAction()) {
+				if (action.hasOperation()) {
+					if (action.getOperation().getType()!=null && action.getOperation().getType().getCode().equals("validate")) {
+						response = validate(resource, action);
+						responseInJson = new org.hl7.fhir.r4.formats.JsonParser().composeString(response);
+					} else {
+						fail("unsupported operation " + action.getOperation());
+					}
+				} 
+				if (action.hasAssert()) {
+					if (action.getAssert().hasResponseCode()) {
+						if (action.getAssert().getResponseCode().equals("200")) {
+							assertNotNull(response);
+						} else {
+							fail("unsupported response code, not implemented yet " + action.getAssert().getResponseCode());
+						}
+						continue;
+					}
+					if (action.getAssert().hasExpression()) {
+						String expressionFhirPath = action.getAssert().getExpression();
+						try {
+							assertEquals(action.getAssert().getValue(), fhirPath.evaluateFirst(response, expressionFhirPath, IPrimitiveType.class).get().getValueAsString(), "expression:\n"+expressionFhirPath+"\nresource:\n"+responseInJson);
+							continue;
+						} catch (ca.uhn.fhir.fhirpath.FhirPathExecutionException e) {
+							fail("error evaluating expression " + expressionFhirPath  + e.getMessage());
+						}
+					}
+					fail("unsupported assert, not implemented yet " + action.getAssert());
+				}
+			}
+		}
 	}
 
 	public OperationOutcome doValidate(String name, Resource resource) throws IOException {
@@ -156,14 +269,14 @@ public class IgValidateR4Test {
 		if (name.startsWith("ch.fhir.ig.ch-elm")) {
 			if (resource.getResourceType() == org.hl7.fhir.r4.model.ResourceType.Bundle) {
 				profile = "http://fhir.ch/ig/ch-elm/StructureDefinition/ch-elm-document-strict";
-			} 
+			}
 			if (resource.getResourceType() == org.hl7.fhir.r4.model.ResourceType.DocumentReference) {
 				profile = "http://fhir.ch/ig/ch-elm/StructureDefinition/PublishDocumentReferenceStrict";
-			} 
-			if (profile == null) {
-				Assumptions.abort("Ignoring validation for " + name +" since no profile found");
 			}
-		} else {		
+			if (profile == null) {
+				Assumptions.abort("Ignoring validation for " + name + " since no profile found");
+			}
+		} else {
 			profile = resource.getMeta().getProfile().get(0).getValue();
 		}
 
@@ -189,8 +302,9 @@ public class IgValidateR4Test {
 		if (!ELM.equals(ig)) {
 			return true;
 		}
-		// only validate bundles for EMED
-		if (ELM.equals(ig) && !(fn.startsWith("Bundle") || fn.startsWith("DocumentReference"))) {
+		if (ELM.equals(ig)
+				&& !(fn.startsWith("Bundle") || fn.startsWith("DocumentReference") || fn.startsWith("TestScript"))) {
+//				&& !fn.startsWith("TestScript")) {
 			return true;
 		}
 		if (ELM.equals(ig) && (fn.startsWith("Bundle-ex-findDocumentReferencesResponse"))) {
@@ -212,13 +326,13 @@ public class IgValidateR4Test {
 		if (r instanceof org.hl7.fhir.r4.model.DomainResource) {
 			org.hl7.fhir.r4.model.DomainResource dr = (org.hl7.fhir.r4.model.DomainResource) r;
 			dr.setText(null);
-			for(org.hl7.fhir.r4.model.Resource c : dr.getContained()) {
+			for (org.hl7.fhir.r4.model.Resource c : dr.getContained()) {
 				removeHtml(c);
 			}
 		}
 		if (r instanceof org.hl7.fhir.r4.model.Bundle) {
 			org.hl7.fhir.r4.model.Bundle dr = (org.hl7.fhir.r4.model.Bundle) r;
-			for(org.hl7.fhir.r4.model.Bundle.BundleEntryComponent entry : dr.getEntry()) {
+			for (org.hl7.fhir.r4.model.Bundle.BundleEntryComponent entry : dr.getEntry()) {
 				removeHtml(entry.getResource());
 			}
 		}
@@ -226,18 +340,18 @@ public class IgValidateR4Test {
 	}
 
 	static private Map<String, byte[]> fetchByPackage(AppProperties.ImplementationGuide src, boolean examples)
-		throws Exception {
+			throws Exception {
 		String thePackageUrl = src.getUrl();
-		if (thePackageUrl==null) {
+		if (thePackageUrl == null) {
 			return new HashMap<String, byte[]>();
 		}
 		PackageLoaderSvc loader = new PackageLoaderSvc();
 		InputStream inputStream = new ByteArrayInputStream(loader.loadPackageUrlContents(thePackageUrl));
 		NpmPackage pi = NpmPackage.fromPackage(inputStream, null, true);
-		return loadPackage(pi, examples);
+		return loadPackage(pi, examples, true);
 	}
 
-	static public Map<String, byte[]> loadPackage(NpmPackage pi, boolean examples) throws Exception {
+	static public Map<String, byte[]> loadPackage(NpmPackage pi, boolean examples, boolean canonical) throws Exception {
 		Map<String, byte[]> res = new HashMap<String, byte[]>();
 		if (pi != null) {
 			if (examples) {
@@ -246,7 +360,8 @@ public class IgValidateR4Test {
 						res.put(s, TextFile.streamToBytes(pi.load("example", s)));
 					}
 				}
-			} else {
+			} 
+			if (canonical) {
 				for (String s : pi.list("package")) {
 					if (process(s)) {
 						res.put(s, TextFile.streamToBytes(pi.load("package", s)));

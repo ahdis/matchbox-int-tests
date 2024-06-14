@@ -129,42 +129,19 @@ hapi:
         url: classpath:/hl7.fhir.uv.extensions.r4#1.0.0.tgz
       ch-elm:
         name: ch.fhir.ig.ch-elm
-        version: 1.3.0
-#      ch-vacd:
-#        name: ch.fhir.ig.ch-vacd
-#        version: 4.0.0-ballot
-#        url: https://fhir.ch/ig/ch-vacd/package.tgz
-#      ch-allergyintolerance:
-#        name: ch.fhir.ig.ch-allergyintolerance
-#        version: 2.0.0-ballot
-#        url: https://fhir.ch/ig/ch-allergyintolerance/package.tgz
-#      ch-orf:
-#        name: ch.fhir.ig.ch-orf
-#        version: 2.0.0-ballot
-#        url: https://fhir.ch/ig/ch-orf/package.tgz
-#      ch-lab-order:
-#        name: ch.fhir.ig.ch-lab-order
-#        version: 2.0.0-ballot
-#        url: https://fhir.ch/ig/ch-lab-order/package.tgz
-#      ch-etoc:
-#        name: ch.fhir.ig.ch-etoc
-#        version: 2.0.0-ballot
-#        url: https://fhir.ch/ig/ch-etoc/package.tgz
-#      ch-epr-mhealth:
-#        name: ch.fhir.ig.ch-epr-mhealth
-#        version: 3.0.0-ballot
-#        url: https://fhir.ch/ig/ch-epr-mhealth/package.tgz
-#      ch-epr-ppqm:
-#        name: ch.fhir.ig.ch-epr-ppqm
-#        version: 2.0.0-ballot
-#        url: https://fhir.ch/ig/ch-epr-ppqm/package.tgz
-#      ch-atc:
-#        name: ch.fhir.ig.ch-atc
-#        version: 3.2.0-ballot
-#        url: https://fhir.ch/ig/ch-atc/package.tgz
+        version: 1.3.1
+        url: https://build.fhir.org/ig/ahdis/ch-elm/package.tgz
 matchbox:
   fhir:
     context:
       txServer: http://localhost:${server.port}/matchboxv3/fhir
 #      txServer: http://tx.fhir.org
 #      txServer: n/a
+      igsPreloaded: ch.fhir.ig.ch-elm#1.3.1
+      #txServer: n/a
+      suppressWarnInfo:
+        hl7.fhir.r4.core#4.0.1:
+          - "Constraint failed: dom-6:"
+          - "regex:Entry '(.+)' isn't reachable by traversing forwards from the Composition"
+        ch.fhir.ig.ch-elm#1.3.1:
+          - "regex:Binding for path (.+) has no source, so can't be checked"
