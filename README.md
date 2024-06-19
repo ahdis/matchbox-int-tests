@@ -7,5 +7,5 @@ module must be installed without the `boot` Maven profile, i.e.:
 `mvn -DskipTests -P !boot install`
 zsh:  `mvn -DskipTests -P \!boot install`
 
-Then, these tests must be run with the matchbox version as parameter: `mvn -Dmatchbox.version=3.8.5 test` 
+Then, these tests must be run with the matchbox version as parameter: `mvn -D'matchbox.version=3.8.5' test` 
 or `mvn site`, then you can find the result in target/site/index.html

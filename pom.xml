@@ -27,7 +27,7 @@
             <dependency>
                 <groupId>health.matchbox</groupId>
                 <artifactId>matchbox</artifactId>
-                <version>3.8.5</version>
+                <version>${matchbox.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
