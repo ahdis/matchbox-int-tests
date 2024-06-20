@@ -26,7 +26,7 @@ public class QrTransformTestsStandalone {
 	private final GenericFhirClient genericClient = new GenericFhirClient(contextR4,
                                                                           "http://10.2.254.194:8080/matchboxv3/fhir");
 
-	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CdaTransformTests.class);
+	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CdaTransformTestsOld.class);
 
 	@BeforeAll
 	void waitUntilStartup() throws InterruptedException {

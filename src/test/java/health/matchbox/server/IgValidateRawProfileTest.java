@@ -64,10 +64,10 @@ public class IgValidateRawProfileTest {
 
 		IBaseOperationOutcome operationOutcome = validationClient.validate(patient,
 																								 "http://hl7.org/fhir/StructureDefinition/Patient");
-		assertEquals(0, IgValidateR4TestStandalone.getValidationFailures((OperationOutcome) operationOutcome));
+		assertEquals(0, IgValidateR4.getValidationFailures((OperationOutcome) operationOutcome));
 		operationOutcome = validationClient.validate(patient,
 																	"http://hl7.org/fhir/StructureDefinition/Bundle");
-		assertEquals(1, IgValidateR4TestStandalone.getValidationFailures((OperationOutcome) operationOutcome));
+		assertEquals(1, IgValidateR4.getValidationFailures((OperationOutcome) operationOutcome));
 	}
 
 	@Test
@@ -84,7 +84,7 @@ public class IgValidateRawProfileTest {
 		IBaseOperationOutcome operationOutcome = validationClient.validate(getContent("ehs-431.json"),
 																								 "http://hl7.org/fhir/StructureDefinition/Bundle");
 		log.debug(contextR4.newJsonParser().encodeResourceToString(operationOutcome));
-		assertEquals(1, IgValidateR4TestStandalone.getValidationFailures((OperationOutcome) operationOutcome));
+		assertEquals(1, IgValidateR4.getValidationFailures((OperationOutcome) operationOutcome));
 	}
 
 	@Test
@@ -99,7 +99,7 @@ public class IgValidateRawProfileTest {
 		IBaseOperationOutcome operationOutcome = validationClient.validate(getContent("ehs-419.json"),
 																								 "http://hl7.org/fhir/StructureDefinition/Patient");
 		log.debug(contextR4.newJsonParser().encodeResourceToString(operationOutcome));
-		assertEquals(0, IgValidateR4TestStandalone.getValidationFailures((OperationOutcome) operationOutcome));
+		assertEquals(0, IgValidateR4.getValidationFailures((OperationOutcome) operationOutcome));
 	}
 
 	private String getContent(String resourceName) throws IOException {

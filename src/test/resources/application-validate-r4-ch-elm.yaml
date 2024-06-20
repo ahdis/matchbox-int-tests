@@ -55,54 +55,6 @@ hapi:
     narrative_enabled: false
     # This is an experimental feature, and does not fully support _total and other FHIR features.
     advanced_lucene_indexing: false
-    ### enable to use the ApacheProxyAddressStrategy which uses X-Forwarded-* headers
-    ### to determine the FHIR server address
-    #   use_apache_address_strategy: false
-    ### forces the use of the https:// protocol for the returned server address.
-    ### alternatively, it may be set using the X-Forwarded-Proto header.
-    #   use_apache_address_strategy_https: false
-    ### enable to set the Server URL
-    #    server_address: http://hapi.fhir.org/baseR4
-    #    defer_indexing_for_codesystems_of_size: 101
-    #    implementationguides:
-    ###    example from registry (packages.fhir.org)
-    #      swiss:
-    #        name: swiss.mednet.fhir
-    #        version: 0.8.0
-    #      example not from registry
-    #      ips_1_0_0:
-    #        url: https://build.fhir.org/ig/HL7/fhir-ips/package.tgz
-    #        name: hl7.fhir.uv.ips
-    #        version: 1.0.0
-    #    supported_resource_types:
-    #      - Patient
-    #      - Observation
-    #    allow_contains_searches: true
-    #    allow_override_default_search_params: true
-    #    auto_create_placeholder_reference_targets: false
-    #    cql_enabled: true
-    #    default_encoding: JSON
-    #    default_pretty_print: true
-    #    default_page_size: 20
-    #    enable_repository_validating_interceptor: false
-    #    enable_index_missing_fields: false
-    #    enable_index_contained_resource: false
-    #    enforce_referential_integrity_on_delete: false
-    #    enforce_referential_integrity_on_write: false
-    #    etag_support_enabled: true
-    #    expunge_enabled: true
-    #    daoconfig_client_id_strategy: null
-    #    client_id_strategy: ALPHANUMERIC
-    #    fhirpath_interceptor_enabled: false
-    #    filter_search_enabled: true
-    #    graphql_enabled: true
-    #    narrative_enabled: true
-    #    mdm_enabled: true
-    #    local_base_urls:
-    #      - https://hapi.fhir.org/baseR4
-    #    partitioning:
-    #      allow_references_across_partitions: false
-    #      partitioning_include_in_search_hashes: false
     cors:
       allow_Credentials: true
       # These are allowed_origin patterns, see: https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/web/cors/CorsConfiguration.html#setAllowedOriginPatterns-java.util.List-
@@ -130,7 +82,7 @@ hapi:
       ch-elm:
         name: ch.fhir.ig.ch-elm
         version: 1.3.1
-        url: https://build.fhir.org/ig/ahdis/ch-elm/package.tgz
+        url: https://fhir.ch/ig/ch-elm/package.tgz
 matchbox:
   fhir:
     context:
@@ -143,5 +95,5 @@ matchbox:
         hl7.fhir.r4.core#4.0.1:
           - "Constraint failed: dom-6:"
           - "regex:Entry '(.+)' isn't reachable by traversing forwards from the Composition"
-        ch.fhir.ig.ch-elm#1.3.1:
+        ch.fhir.ig.ch-elm:
           - "regex:Binding for path (.+) has no source, so can't be checked"

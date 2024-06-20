@@ -36,12 +36,12 @@ import static org.junit.jupiter.api.Assertions.*;
 @ActiveProfiles("cda-transform")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Disabled("The Swiss CDA maps are not tested anymore")
-public class CdaTransformTests {
+public class CdaTransformTestsOld {
 
 	private final FhirContext contextR4 = FhirVersionEnum.R4.newContext();
 	private final GenericFhirClient genericClient = new GenericFhirClient(contextR4, "http://localhost:8083/matchboxv3/fhir");
 
-	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CdaTransformTests.class);
+	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CdaTransformTestsOld.class);
 
 	@BeforeAll
 	void waitUntilStartup() throws Exception {

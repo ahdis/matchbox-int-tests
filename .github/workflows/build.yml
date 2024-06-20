@@ -10,7 +10,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout matchbox
+      - name: Checkout
         uses: actions/checkout@v3
 
       - name: Setup Java 21
@@ -22,6 +22,4 @@ jobs:
           cache: "maven"
 
       - name: Build the project
-        run: mvn --batch-mode --no-transfer-progress --update-snapshots -DskipTests -Dmatchbox.version=3.8.5 compile
-
-        
+        run: mvn --batch-mode --no-transfer-progress --update-snapshots -DskipTests -Dmatchbox.version=3.8.5 site

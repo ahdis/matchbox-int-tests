@@ -72,21 +72,14 @@ import static org.junit.jupiter.api.Assertions.fail;
  *
  * @author oliveregger
  **/
-@SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
-@ContextConfiguration(classes = { Application.class })
-@ActiveProfiles("validate-r4")
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@DirtiesContext
-public class IgValidateR4Test {
+public class IgValidateR4 {
+
 
 	private static final String TARGET_SERVER = "http://localhost:8082/matchboxv3/fhir";
-	private static final Logger log = LoggerFactory.getLogger(IgValidateR4Test.class);
+	private static final Logger log = LoggerFactory.getLogger(IgValidateR4.class);
 	@Autowired
 	ApplicationContext context;
 	private ValidationClient validationClient;
-
-	private static final String EMED = "ch.fhir.ig.ch-emed";
-	private static final String ELM = "ch.fhir.ig.ch-elm";
 
 	static public int getValidationFailures(OperationOutcome outcome) {
 		int fails = 0;
@@ -113,7 +106,17 @@ public class IgValidateR4Test {
 
 	public Stream<Arguments> provideResources() throws Exception {
 
-		Map<String, Object> obj = new Yaml().load(getClass().getResourceAsStream("/application-validate-r4.yaml"));
+		String propertyString =  "";
+		ActiveProfiles classAnnotation = this.getClass().getAnnotation(ActiveProfiles.class);
+		if (classAnnotation != null) {
+			propertyString = classAnnotation.value()[0];
+		} else {
+			log.error("property not found in @ActiveProfile annotation");
+			return null;
+		}
+		String path =  "/application-" + propertyString + ".yaml";
+	  
+		Map<String, Object> obj = new Yaml().load(getClass().getResourceAsStream(path));
 		final List<AppProperties.ImplementationGuide> igs = PackageCacheInitializer.getIgs(obj, true);
 		List<Arguments> arguments = new ArrayList<>();
 		for (AppProperties.ImplementationGuide ig : igs) {
@@ -167,10 +170,7 @@ public class IgValidateR4Test {
 		}
 		return arguments.stream();
 	}
-
 	
-	@ParameterizedTest(name = "{0}")
-	@MethodSource("provideResources")
 	public void testValidate(String name, Resource resource) throws Exception {
 		if (resource instanceof TestScript) {
 			runTestScript(name, (TestScript) resource);
@@ -179,15 +179,9 @@ public class IgValidateR4Test {
 		OperationOutcome outcome = doValidate(name, resource);
 		int fails = getValidationFailures(outcome);
 		if (fails > 0) {
-			log.error("failing " + name);
-			for (final var issue : outcome.getIssue()) {
-				log.debug(String.format("  [%s][%s] %s",
-						issue.getSeverity().name(),
-						issue.getCode().name(),
-						issue.getDiagnostics()));
-			}
-			// log.debug(contextR4.newJsonParser().encodeResourceToString(resource));
-			// log.debug(contextR4.newJsonParser().encodeResourceToString(outcome));
+			String responseInJson = new org.hl7.fhir.r4.formats.JsonParser().composeString(outcome);
+			String resourceInJson = new org.hl7.fhir.r4.formats.JsonParser().composeString(resource);
+			assertEquals(0, fails, "Validation Errors " + fails + "\noutcome:\n" + responseInJson + "\nresource\n" + resourceInJson);
 		}
 		assertEquals(0, fails);
 	}
@@ -264,21 +258,7 @@ public class IgValidateR4Test {
 		}
 
 		String content = new org.hl7.fhir.r4.formats.JsonParser().composeString(resource);
-		String profile = null;
-
-		if (name.startsWith("ch.fhir.ig.ch-elm")) {
-			if (resource.getResourceType() == org.hl7.fhir.r4.model.ResourceType.Bundle) {
-				profile = "http://fhir.ch/ig/ch-elm/StructureDefinition/ch-elm-document-strict";
-			}
-			if (resource.getResourceType() == org.hl7.fhir.r4.model.ResourceType.DocumentReference) {
-				profile = "http://fhir.ch/ig/ch-elm/StructureDefinition/PublishDocumentReferenceStrict";
-			}
-			if (profile == null) {
-				Assumptions.abort("Ignoring validation for " + name + " since no profile found");
-			}
-		} else {
-			profile = resource.getMeta().getProfile().get(0).getValue();
-		}
+		String profile = determineProfileToValidate(name, resource);
 
 		OperationOutcome outcome = (OperationOutcome) this.validationClient.validate(content, profile);
 		if (outcome == null) {
@@ -295,28 +275,21 @@ public class IgValidateR4Test {
 		return outcome;
 	}
 
-	private static boolean exemptFile(String fn, String ig) {
+	protected String determineProfileToValidate(String name, Resource resource) {
+		if (resource.getMeta()!=null && resource.getMeta().getProfile()!=null && resource.getMeta().getProfile().size()>0) {
+			return resource.getMeta().getProfile().get(0).getValue();
+		}
+		return  "http://hl7.org/fhir/StructureDefinition/"+resource.getResourceType();	
+	}
+
+	protected boolean exemptFile(String fn, String ig) {
 		if (Utilities.existsInList(fn, "spec.internals", "version.info", "schematron.zip", "package.json")) {
 			return true;
 		}
-		if (!ELM.equals(ig)) {
+		if ((fn.startsWith("StructureDefinition") || fn.startsWith("ValueSet") || fn.startsWith("CodeSystem") || fn.startsWith("Parameters") || fn.startsWith("OperationDefinition"))) {
 			return true;
 		}
-		if (ELM.equals(ig)
-				&& !(fn.startsWith("Bundle") || fn.startsWith("DocumentReference") || fn.startsWith("TestScript"))) {
-//				&& !fn.startsWith("TestScript")) {
-			return true;
-		}
-		if (ELM.equals(ig) && (fn.startsWith("Bundle-ex-findDocumentReferencesResponse"))) {
-			return true;
-		}
-		if (ELM.equals(ig) && (fn.startsWith("DocumentReference-1-DocumentReferenceResponseFailed"))) {
-			return true;
-		}
-		if (ELM.equals(ig) && (fn.startsWith("DocumentReference-1-DocumentReferenceResponseCompleted"))) {
-			return true;
-		}
-		if (ELM.equals(ig) && (fn.startsWith("DocumentReference-1-DocumentReferenceResponseInProgress"))) {
+		if (ig.startsWith("hl7.fhir.uv.extensions")) {
 			return true;
 		}
 		return false;

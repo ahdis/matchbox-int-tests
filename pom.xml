@@ -126,7 +126,8 @@
                         <usePhrasedClassNameInRunning>true</usePhrasedClassNameInRunning>
                         <usePhrasedClassNameInTestCaseSummary>true</usePhrasedClassNameInTestCaseSummary>
                     </statelessTestsetInfoReporter>
-                </configuration>
+                    <argLine>-Xmx2G -Xms2G</argLine>
+                 </configuration>
                 <executions>
                     <execution>
                         <id>default-test</id>
