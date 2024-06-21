@@ -50,9 +50,8 @@ public class IgValidateR4ChExchangeTest extends IgValidateR4 {
 	@MethodSource("provideResources")
 	public void testValidate(String name, Resource resource) throws Exception {
 
-		assumeFalse(name.equals("ch.fhir.ig.ch-emed-Bundle-PharmaceuticalAdvice-ChangeDosage"), "https://github.com/ahdis/matchbox/issues/250");
 		assumeFalse(name.equals("ch.fhir.ig.ch-ips-Bundle-UC1-SwissIpsDocument2"), "https://github.com/hl7ch/ch-ips/issues/4");
-		assumeFalse(name.equals("ch.fhir.ig.ch-allergyintolerance-Bundle-ch-allergyintolerance-document-example"), "https://github.com/ahdis/matchbox/issues/251");
+		assumeFalse(name.equals("ch.fhir.ig.ch-lab-report-Bundle-LabResultReport-2-electrophoresis"), "https://github.com/ahdis/matchbox/issues/252");
 		
 		super.testValidate(name, resource);
 	}
