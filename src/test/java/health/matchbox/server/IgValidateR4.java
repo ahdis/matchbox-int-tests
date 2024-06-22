@@ -355,6 +355,6 @@ public class IgValidateR4 {
 		if ("package.json".equals(file)) {
 			return false;
 		}
-		return !file.startsWith("ConceptMap-");
+		return !file.startsWith("ImplementationGuide-");
 	}
 }
