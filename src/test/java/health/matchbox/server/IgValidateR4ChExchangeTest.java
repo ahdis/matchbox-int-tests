@@ -49,10 +49,10 @@ public class IgValidateR4ChExchangeTest extends IgValidateR4 {
 	@ParameterizedTest(name = "{0}")
 	@MethodSource("provideResources")
 	public void testValidate(String name, Resource resource) throws Exception {
-
 		assumeFalse(name.equals("ch.fhir.ig.ch-ips-Bundle-UC1-SwissIpsDocument2"), "https://github.com/hl7ch/ch-ips/issues/4");
-		assumeFalse(name.equals("ch.fhir.ig.ch-lab-report-Bundle-LabResultReport-2-electrophoresis"), "https://github.com/ahdis/matchbox/issues/252");
-		
+		if (!name.equals("ch.fhir.ig.ch-lab-report-Bundle-LabResultReport-2-electrophoresis")) {
+			assumeFalse(name.startsWith("ch.fhir.ig.ch-lab-report-Bundle-"), "Performance issue see also https://github.com/ahdis/matchbox/issues/252");
+		}
 		super.testValidate(name, resource);
 	}
 

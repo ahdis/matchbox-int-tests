@@ -199,7 +199,7 @@ public class IgValidationTests {
 	private MatchboxEngine getEngine() throws IOException, URISyntaxException {
 		final var newEngine = new MatchboxEngine.MatchboxEngineBuilder()
 			.getEngineR4();
-		newEngine.setTerminologyServer("http://tx.fhir.org", null, FhirPublication.R4);
+		newEngine.setTerminologyServer("http://tx.fhir.org", null, FhirPublication.R4, false);
 		newEngine.getContext().setCanRunWithoutTerminology(false);
 		newEngine.getContext().setNoTerminologyServer(false);
 		// 2024-04-07 11:23:12.385 [main] ERROR h.matchbox.engine.IgValidationTests [IgValidationTests.java:81] [ERROR][INVALID] Der Displayname f\u00fcr http://loinc.org#57828-6 sollte einer von ''Prescription list'' anstelle von 'PRESCRIPTIONS' sein
