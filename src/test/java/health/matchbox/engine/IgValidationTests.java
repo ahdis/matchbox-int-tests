@@ -7,6 +7,7 @@ import org.hl7.fhir.utilities.FhirPublication;
 import org.hl7.fhir.utilities.TextFile;
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.utilities.npm.NpmPackage;
+import org.hl7.fhir.r5.context.BaseWorkerContext;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -15,8 +16,12 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ca.uhn.fhir.jpa.packages.loader.PackageLoaderSvc;
+
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,7 +32,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import org.junit.jupiter.api.Disabled;
 
 /**
  * A test bench to load IGs in matchbox-engine and validate all their examples.
@@ -35,15 +39,14 @@ import org.junit.jupiter.api.Disabled;
  * @author Quentin Ligier
  **/
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@Disabled
 public class IgValidationTests {
 	private static final Logger log = LoggerFactory.getLogger(IgValidationTests.class);
 
-	private static final String EMED = "/igs/ch.fhir.ig.ch-emed#4.0.1.tgz";
+	private static final String EMED = "https://fhir.ch/ig/ch-emed/package.tgz";
 	private static final List<String> IGS = List.of(
-		"/igs/ihe.formatcode.fhir#1.1.0.tgz",
-		"/igs/ch.fhir.ig.ch-epr-term#2.0.10.tgz",
-		"/igs/ch.fhir.ig.ch-core#4.0.1.tgz",
+		"https://profiles.ihe.net/fhir/ihe.formatcode.fhir/package.tgz",
+		"https://fhir.ch/ig/ch-term/package.tgz",
+		"https://fhir.ch/ig/ch-core/package.tgz",
 		EMED
 	);
 
@@ -52,8 +55,12 @@ public class IgValidationTests {
 
 	public IgValidationTests() throws IOException, URISyntaxException {
 		this.engine = this.getEngine();
+		this.engine.initTxCache(System.getProperty("user.dir")+ File.separator + "txCache");
+		((BaseWorkerContext) this.engine.getContext()).setCachingAllowed(true);
+		PackageLoaderSvc loader = new PackageLoaderSvc();
 		for (final String ig : IGS) {
-			this.engine.loadPackage(getClass().getResourceAsStream(ig));
+			InputStream inputStream = new ByteArrayInputStream(loader.loadPackageUrlContents(ig));
+			this.engine.loadPackage(inputStream);
 		}
 		log.info("------- Initialized --------");
 	}
@@ -63,7 +70,7 @@ public class IgValidationTests {
 	void testValidate(final String name, final Resource resource) throws Exception {
 		log.info("Validating resource %s".formatted(name));
 		if (!resource.getMeta().hasProfile()) {
-			Assumptions.abort("No meta.profile found, unable to validatee this resource");
+			Assumptions.abort("No meta.profile found, unable to validate this resource");
 		}
 		final OperationOutcome outcome = this.engine.validate(resource,
 																				resource.getMeta().getProfile().get(0).getValue());
@@ -108,10 +115,10 @@ public class IgValidationTests {
 	public static Stream<Arguments> provideResources() throws Exception {
 		List<Arguments> arguments = new ArrayList<>();
 		for (final String ig : IGS) {
-			/*if (ig.contains("ch.fhir.ig.ch-emed")) {
-				// The IG contains unvalidatable examples
+			if (!ig.equals(EMED)) {
+				// only validate bundles for EMED
 				continue;
-			}*/
+			}
 			Map<String, byte[]> source = fetchByPackage(ig, true);
 			for (Map.Entry<String, byte[]> t : source.entrySet()) {
 				String fn = t.getKey();
@@ -140,14 +147,6 @@ public class IgValidationTests {
 		if (Utilities.existsInList(fn, "spec.internals", "version.info", "schematron.zip", "package.json")) {
 			return true;
 		}
-		if (!EMED.equals(ig)) {
-			return true;
-		}
-		if (fn.endsWith("MedicationRequest-MedReq-ChangeMedication.json")) {
-			// see issue https://github.com/ahdis/matchbox-int-tests/issues/6 cannot check slice due to unknown reference
-			// [IgValidationTests.java:79] [INFORMATION][INFORMATIONAL] This element does not match any known slice defined in the profile http://fhir.ch/ig/ch-emed/StructureDefinition/ch-emed-medicationrequest-changed|4.0.1 (this may not be a problem, but you should check that it's not intended to match a slice)
-			return true;
-		}
 		// only validate bundles for EMED
 		if (EMED.equals(ig) && !fn.startsWith("Bundle")) {
 			return true;
@@ -155,8 +154,10 @@ public class IgValidationTests {
 		return false;
 	}
 
-	private static Map<String, byte[]> fetchByPackage(String src, boolean examples) throws Exception {
-		NpmPackage pi = NpmPackage.fromPackage(IgValidationTests.class.getResourceAsStream(src), null, true);
+	private static Map<String, byte[]> fetchByPackage(String url, boolean examples) throws Exception {
+		PackageLoaderSvc loader = new PackageLoaderSvc();
+		InputStream inputStream = new ByteArrayInputStream(loader.loadPackageUrlContents(url));
+		NpmPackage pi = NpmPackage.fromPackage(inputStream, null, true);
 		return loadPackage(pi, examples);
 	}
 
@@ -199,10 +200,10 @@ public class IgValidationTests {
 	private MatchboxEngine getEngine() throws IOException, URISyntaxException {
 		final var newEngine = new MatchboxEngine.MatchboxEngineBuilder()
 			.getEngineR4();
-		newEngine.setTerminologyServer("http://tx.fhir.org", null, FhirPublication.R4, false);
+//		newEngine.setTerminologyServer("http://tx.fhir.org", null, FhirPublication.R4, false);
+		newEngine.setTerminologyServer("http://tx.fhir.org", null, FhirPublication.R4, true);
 		newEngine.getContext().setCanRunWithoutTerminology(false);
 		newEngine.getContext().setNoTerminologyServer(false);
-		// 2024-04-07 11:23:12.385 [main] ERROR h.matchbox.engine.IgValidationTests [IgValidationTests.java:81] [ERROR][INVALID] Der Displayname f\u00fcr http://loinc.org#57828-6 sollte einer von ''Prescription list'' anstelle von 'PRESCRIPTIONS' sein
 		newEngine.setDisplayWarnings(true);
 		return newEngine;
 	}

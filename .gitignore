@@ -39,3 +39,4 @@ build/
 
 database/
 fhir.logdir_IS_UNDEFINED/
+txCache
