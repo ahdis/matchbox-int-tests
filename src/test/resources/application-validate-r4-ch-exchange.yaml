@@ -39,33 +39,6 @@ management:
         include: "*"
 hapi:
   fhir:
-    ### This is the FHIR version. Choose between, DSTU2, DSTU3, R4 or R5
-    openapi_enabled: true
-    fhir_version: R4
-    defer_indexing_for_codesystems_of_size: 0
-    fhirpath_interceptor_enabled: true
-    mdm_enabled: false
-    delete_expunge_enabled: true
-    retain_cached_searches_mins: 1
-    reuse_cached_search_results_millis: 1000
-    bulk_export_enabled: false
-    allow_external_references: true
-    allow_cascading_deletes: true
-    allow_multiple_delete: true
-    narrative_enabled: false
-    # This is an experimental feature, and does not fully support _total and other FHIR features.
-    advanced_lucene_indexing: false
-    cors:
-      allow_Credentials: true
-      # These are allowed_origin patterns, see: https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/web/cors/CorsConfiguration.html#setAllowedOriginPatterns-java.util.List-
-      allowed_origin:
-        - "*"
-
-    # Search coordinator thread pool sizes
-    search-coord-core-pool-size: 20
-    search-coord-max-pool-size: 100
-    search-coord-queue-capacity: 200
-
     implementationguides:
       fhir_r4_core:
         name: hl7.fhir.r4.core
