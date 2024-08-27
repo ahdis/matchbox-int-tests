@@ -82,6 +82,7 @@ hapi:
       ch-elm:
         name: ch.fhir.ig.ch-elm
         version: 1.4.0
+        url: https://fhir.ch/ig/ch-elm/package.tgz
 matchbox:
   fhir:
     context:
