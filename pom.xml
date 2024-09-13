@@ -162,7 +162,7 @@
         <profile>
             <id>dev</id>
             <properties>
-                <matchbox.version>3.8.9</matchbox.version>
+                <matchbox.version>3.9.0</matchbox.version>
             </properties>
         </profile>
     </profiles>
