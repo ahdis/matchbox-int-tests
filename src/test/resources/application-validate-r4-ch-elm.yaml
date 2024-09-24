@@ -81,7 +81,7 @@ hapi:
         url: classpath:/hl7.fhir.uv.extensions.r4#1.0.0.tgz
       ch-elm:
         name: ch.fhir.ig.ch-elm
-        version: 1.4.0
+        version: 1.5.0
         url: https://build.fhir.org/ig/ahdis/ch-elm/package.tgz
 matchbox:
   fhir:
@@ -89,7 +89,7 @@ matchbox:
       txServer: http://localhost:${server.port}/matchboxv3/fhir
 #      txServer: http://tx.fhir.org
 #      txServer: n/a
-      igsPreloaded: ch.fhir.ig.ch-elm#1.4.0
+      igsPreloaded: ch.fhir.ig.ch-elm#1.5.0
       #txServer: n/a
       suppressWarnInfo:
         hl7.fhir.r4.core#4.0.1:
@@ -100,4 +100,6 @@ matchbox:
           - "regex:None of the codings provided are in the value set 'Observation Interpretation Codes'(.*)"
           - "regex:This element does not match any known slice defined in the profile http://hl7.eu/fhir/laboratory/StructureDefinition/Patient-eu-lab(.+)"
           - "regex:This element does not match any known slice defined in the profile http://hl7.eu/fhir/laboratory/StructureDefinition/HumanName-eu(.+)"
-      
+          - "regex:Does not match slice '(.+)' (.+)"
+          - "regex:(.+)Unable to find a match for profile(.+)"
+          - "regex:(.+): Specified profile type was '(.+)' in profile '(.+)', but found type '(.+)"      

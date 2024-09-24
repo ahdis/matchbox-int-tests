@@ -19,7 +19,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>21</java.version>
-        <matchbox.version>3.8.9</matchbox.version>
+        <matchbox.version>3.9.1</matchbox.version>
     </properties>
 
     <dependencyManagement>
@@ -162,7 +162,7 @@
         <profile>
             <id>dev</id>
             <properties>
-                <matchbox.version>3.9.0</matchbox.version>
+                <matchbox.version>3.9.1</matchbox.version>
             </properties>
         </profile>
     </profiles>

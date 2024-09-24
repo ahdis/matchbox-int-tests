@@ -22,4 +22,4 @@ jobs:
           cache: "maven"
 
       - name: Build the project
-        run: mvn --batch-mode --no-transfer-progress --update-snapshots -DskipTests -Dmatchbox.version=3.8.9 site
+        run: mvn --batch-mode --no-transfer-progress --update-snapshots -DskipTests -Dmatchbox.version=3.9.1 site
