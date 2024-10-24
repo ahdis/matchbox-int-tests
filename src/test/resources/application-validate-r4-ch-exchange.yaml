@@ -14,13 +14,6 @@ spring:
     max-active: 15
     hikari:
       maximum-pool-size: 10
-  jpa:
-    properties:
-      hibernate.format_sql: false
-      hibernate.show_sql: false
-      hibernate.dialect: ca.uhn.fhir.jpa.model.dialect.HapiFhirH2Dialect
-      hibernate.search.enabled: true
-      hibernate.search.backend.lucene_version: LUCENE_CURRENT
   batch:
     job:
       enabled: false
