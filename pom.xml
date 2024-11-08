@@ -19,7 +19,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>21</java.version>
-        <matchbox.version>3.9.4</matchbox.version>
+        <matchbox.version>3.9.6</matchbox.version>
     </properties>
 
     <dependencyManagement>
@@ -113,7 +113,8 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.3.0</version>
                 <configuration>
-                    <statelessTestsetReporter implementation="org.apache.maven.plugin.surefire.extensions.junit5.JUnit5Xml30StatelessReporter">
+                    <statelessTestsetReporter
+                        implementation="org.apache.maven.plugin.surefire.extensions.junit5.JUnit5Xml30StatelessReporter">
                         <disable>false</disable>
                         <version>3.0</version>
                         <usePhrasedFileName>false</usePhrasedFileName>
@@ -121,19 +122,21 @@
                         <usePhrasedTestCaseClassName>true</usePhrasedTestCaseClassName>
                         <usePhrasedTestCaseMethodName>true</usePhrasedTestCaseMethodName>
                     </statelessTestsetReporter>
-                    <consoleOutputReporter implementation="org.apache.maven.plugin.surefire.extensions.junit5.JUnit5ConsoleOutputReporter">
+                    <consoleOutputReporter
+                        implementation="org.apache.maven.plugin.surefire.extensions.junit5.JUnit5ConsoleOutputReporter">
                         <disable>false</disable>
                         <encoding>UTF-8</encoding>
                         <usePhrasedFileName>false</usePhrasedFileName>
                     </consoleOutputReporter>
-                    <statelessTestsetInfoReporter implementation="org.apache.maven.plugin.surefire.extensions.junit5.JUnit5StatelessTestsetInfoReporter">
+                    <statelessTestsetInfoReporter
+                        implementation="org.apache.maven.plugin.surefire.extensions.junit5.JUnit5StatelessTestsetInfoReporter">
                         <disable>false</disable>
                         <usePhrasedFileName>false</usePhrasedFileName>
                         <usePhrasedClassNameInRunning>true</usePhrasedClassNameInRunning>
                         <usePhrasedClassNameInTestCaseSummary>true</usePhrasedClassNameInTestCaseSummary>
                     </statelessTestsetInfoReporter>
                     <argLine>-Xmx3G -Xms3G</argLine>
-                 </configuration>
+                </configuration>
                 <executions>
                     <execution>
                         <id>default-test</id>
@@ -150,19 +153,19 @@
 
     <reporting>
         <plugins>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-surefire-report-plugin</artifactId>
-            <version>3.2.5</version>
-          </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-report-plugin</artifactId>
+                <version>3.2.5</version>
+            </plugin>
         </plugins>
-      </reporting>
+    </reporting>
 
     <profiles>
         <profile>
             <id>dev</id>
             <properties>
-                <matchbox.version>3.9.1</matchbox.version>
+                <matchbox.version>3.9.6</matchbox.version>
             </properties>
         </profile>
     </profiles>
