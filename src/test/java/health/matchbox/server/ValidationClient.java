@@ -83,10 +83,50 @@ public class ValidationClient extends GenericClient {
 		setEncoding(EncodingEnum.detectEncoding(theContents));
 		Map<String, List<String>> theExtraParams = null;
 		if (theProfile != null) {
-			theExtraParams = new HashMap<String, List<String>>();
-			List<String> profiles = new ArrayList<String>();
+			theExtraParams = new HashMap<>();
+			List<String> profiles = new ArrayList<>();
 			profiles.add(theProfile);
 			theExtraParams.put("profile", profiles);
+		}
+		OutcomeResponseHandler binding = new OutcomeResponseHandler();
+		BaseHttpClientInvocation clientInvoke = createValidationInvocation(getFhirContext(),
+																								 "$validate",
+																								 theContents,
+																								 theExtraParams);
+		MethodOutcome resp = invokeClient(getFhirContext(),
+													 binding,
+													 clientInvoke,
+													 null,
+													 null,
+													 false,
+													 null,
+													 null,
+													 null,
+													 null,
+													 null);
+		return resp.getOperationOutcome();
+	}
+
+	/**
+	 * Performs the $validate operation with a direct POST (see
+	 * http://hl7.org/fhir/resource-operation-validate.html#examples) and the profile specified as a parameter (not the
+	 * Parameters syntax).
+	 *
+	 * @param theContents content to validate
+	 * @param theProfile  optional: profile to validate against
+	 * @param theIg       optional: IG to validate against
+	 * @return
+	 */
+	public IBaseOperationOutcome validate(final String theContents,
+													  final String theProfile,
+													  final String theIg) {
+		this.setEncoding(EncodingEnum.detectEncoding(theContents));
+		final Map<String, List<String>> theExtraParams = new HashMap<>();
+		if (theProfile != null) {
+			theExtraParams.put("profile", List.of(theProfile));
+		}
+		if (theIg != null) {
+			theExtraParams.put("ig", List.of(theIg));
 		}
 		OutcomeResponseHandler binding = new OutcomeResponseHandler();
 		BaseHttpClientInvocation clientInvoke = createValidationInvocation(getFhirContext(),
