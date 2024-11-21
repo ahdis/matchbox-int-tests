@@ -38,37 +38,37 @@ hapi:
         version: 4.0.1
         url: classpath:/hl7.fhir.r4.core.tgz
       fhir_terminology:
-        name: hl7.terminology
-        version: 5.4.0
-        url: classpath:/hl7.terminology#5.4.0.tgz
+        name: hl7.terminology.r4
+        version: 6.1.0
+        url: classpath:/hl7.terminology.r4#6.1.0.tgz
       fhir_extensions:
         name: hl7.fhir.uv.extensions.r4
         version: 1.0.0
         url: classpath:/hl7.fhir.uv.extensions.r4#1.0.0.tgz
       ch-emed:
         name: ch.fhir.ig.ch-emed
-        version: 5.0.0-ballot 
+        version: 5.0.0-ballot
         url: https://fhir.ch/ig/ch-emed/package.tgz
       ch-ips:
         name: ch.fhir.ig.ch-ips
-        version: 1.0.0-ballot 
+        version: 1.0.0-ballot
         url: https://fhir.ch/ig/ch-ips/package.tgz
       ch-vacd:
         name: ch.fhir.ig.ch-vacd
-        version: 5.0.0-ballot 
+        version: 5.0.0-ballot
         url: https://fhir.ch/ig/ch-vacd/package.tgz
       ch-allergyintolerance:
         name: ch.fhir.ig.ch-allergyintolerance
-        version: 3.0.0-ballot 
+        version: 3.0.0-ballot
         url: https://fhir.ch/ig/ch-allergyintolerance/package.tgz
       ch-lab-report:
         name: ch.fhir.ig.ch-lab-report
-        version: 1.0.0-ballot 
+        version: 1.0.0-ballot
         url: https://fhir.ch/ig/ch-lab-report/package.tgz
 matchbox:
   fhir:
     context:
-#      txServer: http://localhost:${server.port}/matchboxv3/fhir
+      #      txServer: http://localhost:${server.port}/matchboxv3/fhir
       txServer: http://tx.fhir.org
       suppressWarnInfo:
         hl7.fhir.r4.core#4.0.1:
