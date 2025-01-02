@@ -47,24 +47,19 @@ hapi:
         url: classpath:/hl7.fhir.uv.extensions.r4#1.0.0.tgz
       ch-emed:
         name: ch.fhir.ig.ch-emed
-        version: 5.0.0-ballot
-        url: https://fhir.ch/ig/ch-emed/package.tgz
+        version: 5.0.0
       ch-ips:
         name: ch.fhir.ig.ch-ips
-        version: 1.0.0-ballot
-        url: https://fhir.ch/ig/ch-ips/package.tgz
+        version: 1.0.0
       ch-vacd:
         name: ch.fhir.ig.ch-vacd
-        version: 5.0.0-ballot
-        url: https://fhir.ch/ig/ch-vacd/package.tgz
+        version: 5.0.0
       ch-allergyintolerance:
         name: ch.fhir.ig.ch-allergyintolerance
-        version: 3.0.0-ballot
-        url: https://fhir.ch/ig/ch-allergyintolerance/package.tgz
+        version: 3.0.0
       ch-lab-report:
         name: ch.fhir.ig.ch-lab-report
-        version: 1.0.0-ballot
-        url: https://fhir.ch/ig/ch-lab-report/package.tgz
+        version: 1.0.0
 matchbox:
   fhir:
     context:
