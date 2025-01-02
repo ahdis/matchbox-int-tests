@@ -48,18 +48,23 @@ hapi:
       ch-emed:
         name: ch.fhir.ig.ch-emed
         version: 5.0.0
+        url: https://fhir.ch/ig/ch-emed/package.tgz
       ch-ips:
         name: ch.fhir.ig.ch-ips
         version: 1.0.0
+        url: https://fhir.ch/ig/ch-ips/package.tgz
       ch-vacd:
         name: ch.fhir.ig.ch-vacd
         version: 5.0.0
+        url: https://fhir.ch/ig/ch-vacd/package.tgz
       ch-allergyintolerance:
         name: ch.fhir.ig.ch-allergyintolerance
         version: 3.0.0
+        url: https://fhir.ch/ig/ch-allergyintolerance/package.tgz
       ch-lab-report:
         name: ch.fhir.ig.ch-lab-report
-        version: 1.0.0
+        version: 1.0.0       
+        url: https://fhir.ch/ig/ch-lab-report/package.tgz
 matchbox:
   fhir:
     context:
