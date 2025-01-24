@@ -151,6 +151,10 @@ public class IgValidationTests {
 		if (EMED.equals(ig) && !fn.startsWith("Bundle")) {
 			return true;
 		}
+		// https://chat.fhir.org/#narrow/channel/179252-IG-creation/topic/display-warnings.3A.20true.20-.3E.20wrong.20display.20values.3A.20error
+		if (EMED.equals(ig) && fn.startsWith("Bundle-2-6-MedicationPrescription")) {
+			return true;
+		}
 		return false;
 	}
 

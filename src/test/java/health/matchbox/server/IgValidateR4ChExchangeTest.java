@@ -40,6 +40,10 @@ public class IgValidateR4ChExchangeTest extends IgValidateR4 {
 		if (super.exemptFile(fn, ig)) {
 			return true;
 		}
+		if (fn.startsWith("Bundle-2-6-MedicationPrescription")) {
+			// https://chat.fhir.org/#narrow/channel/179252-IG-creation/topic/display-warnings.3A.20true.20-.3E.20wrong.20display.20values.3A.20error
+			return true;
+		}
 		if (!(fn.startsWith("Bundle") || fn.startsWith("TestScript"))) {
 			return true;
 		}
