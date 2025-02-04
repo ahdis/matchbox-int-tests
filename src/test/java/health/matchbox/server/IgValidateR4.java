@@ -61,7 +61,7 @@ public class IgValidateR4 {
 	private static final Logger log = LoggerFactory.getLogger(IgValidateR4.class);
 	@Autowired
 	ApplicationContext context;
-	private ValidationClient validationClient;
+	private static ValidationClient validationClient;
 
 	static public int getValidationFailures(OperationOutcome outcome) {
 		int fails = 0;
@@ -79,11 +79,11 @@ public class IgValidateR4 {
 	}
 
 	@BeforeAll
-	public synchronized void beforeAll() throws Exception {
+	public static synchronized void beforeAll() throws Exception {
 		Thread.sleep(40000); // give the server some time to start up
-		FhirContext contextR4 = FhirVersionEnum.R4.newContext();
-		this.validationClient = new ValidationClient(contextR4, TARGET_SERVER);
-		this.validationClient.capabilities();
+		FhirContext contextR4 = FhirVersionEnum.R4.newContextCached();
+		validationClient = new ValidationClient(contextR4, TARGET_SERVER);
+		validationClient.capabilities();
 	}
 
 	public Stream<Arguments> provideResources() throws Exception {
@@ -185,7 +185,7 @@ public class IgValidateR4 {
 		} else {
 			fail("missing profile parameter in params " + params);
 		}
-		OperationOutcome outcome = (OperationOutcome) this.validationClient.validate(content, profile);
+		OperationOutcome outcome = (OperationOutcome) validationClient.validate(content, profile);
 		return outcome;
 	}
 
@@ -232,25 +232,24 @@ public class IgValidateR4 {
 	public OperationOutcome doValidate(String name, Resource resource) throws IOException {
 		log.debug("validating resource " + resource.getId() + " with " + TARGET_SERVER);
 
-		FhirContext contextR4 = FhirVersionEnum.R4.newContext();
-
 		if (name.startsWith("ch.fhir.ig.ch-emed")) {
 			// remove text from bundle
 			resource = removeHtml(resource);
 		}
 
-		String content = new org.hl7.fhir.r4.formats.JsonParser().composeString(resource);
+		final var parser = new org.hl7.fhir.r4.formats.JsonParser();
+		String content = parser.composeString(resource);
 		String profile = determineProfileToValidate(name, resource);
 
-		OperationOutcome outcome = (OperationOutcome) this.validationClient.validate(content, profile);
+		OperationOutcome outcome = (OperationOutcome) validationClient.validate(content, profile);
 		if (outcome == null) {
-			log.debug(contextR4.newXmlParser().encodeResourceToString(resource));
+			log.debug(parser.composeString(resource));
 			log.error("should have a return element");
 		} else {
 			if (getValidationFailures(outcome) > 0) {
-				log.debug(contextR4.newXmlParser().encodeResourceToString(resource));
+				log.debug(parser.composeString(resource));
 				log.debug("Validation Errors " + getValidationFailures(outcome));
-				log.error(contextR4.newXmlParser().encodeResourceToString(outcome));
+				log.error(parser.composeString(outcome));
 			}
 		}
 
@@ -298,7 +297,7 @@ public class IgValidateR4 {
 			throws Exception {
 		String thePackageUrl = src.getUrl();
 		if (thePackageUrl == null) {
-			return new HashMap<String, byte[]>();
+			return new HashMap<>(0);
 		}
 		PackageLoaderSvc loader = new PackageLoaderSvc();
 		InputStream inputStream = new ByteArrayInputStream(loader.loadPackageUrlContents(thePackageUrl));
@@ -307,7 +306,7 @@ public class IgValidateR4 {
 	}
 
 	static public Map<String, byte[]> loadPackage(NpmPackage pi, boolean examples, boolean canonical) throws Exception {
-		Map<String, byte[]> res = new HashMap<String, byte[]>();
+		Map<String, byte[]> res = new HashMap<>(20);
 		if (pi != null) {
 			if (examples) {
 				for (String s : pi.list("example")) {

@@ -48,14 +48,14 @@ public class IgValidateRawProfileTest {
 	@BeforeAll
 	void waitUntilStartup() throws Exception {
 		Thread.sleep(30000); // give the server some time to start up
-		final FhirContext contextR4 = FhirVersionEnum.R4.newContext();
+		final FhirContext contextR4 = FhirVersionEnum.R4.newContextCached();
 		final var validationClient = new ValidationClient(contextR4, this.targetServer);
 		validationClient.capabilities();
 	}
 
 	@Test
 	public void validateRaw() {
-		FhirContext contextR4 = FhirVersionEnum.R4.newContext();
+		FhirContext contextR4 = FhirVersionEnum.R4.newContextCached();
 		ValidationClient validationClient = new ValidationClient(contextR4, this.targetServer);
 		String patient = "<Patient xmlns=\"http://hl7.org/fhir\">\n" + "            <id value=\"example\"/>\n"
 			+ "            <text>\n" + "               <status value=\"generated\"/>\n"
@@ -74,7 +74,7 @@ public class IgValidateRawProfileTest {
 	//  https://gazelle.ihe.net/jira/browse/EHS-431
 	public void validateEhs431() throws IOException {
 		//
-		FhirContext contextR4 = FhirVersionEnum.R4.newContext();
+		FhirContext contextR4 = FhirVersionEnum.R4.newContextCached();
 		ValidationClient validationClient = new ValidationClient(contextR4, this.targetServer);
 
 		validationClient.capabilities();
@@ -91,7 +91,7 @@ public class IgValidateRawProfileTest {
 	//  https://gazelle.ihe.net/jira/browse/EHS-419
 	public void validateEhs419() throws IOException {
 		//
-		FhirContext contextR4 = FhirVersionEnum.R4.newContext();
+		FhirContext contextR4 = FhirVersionEnum.R4.newContextCached();
 		ValidationClient validationClient = new ValidationClient(contextR4, this.targetServer);
 
 		validationClient.capabilities();

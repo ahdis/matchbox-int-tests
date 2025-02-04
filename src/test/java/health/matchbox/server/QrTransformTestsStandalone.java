@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @Disabled
 public class QrTransformTestsStandalone {
 
-	private final FhirContext contextR4 = FhirVersionEnum.R4.newContext();
+	private final FhirContext contextR4 = FhirVersionEnum.R4.newContextCached();
 	private final GenericFhirClient genericClient = new GenericFhirClient(contextR4,
                                                                           "http://10.2.254.194:8080/matchboxv3/fhir");
 
