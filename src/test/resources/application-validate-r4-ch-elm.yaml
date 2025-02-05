@@ -73,13 +73,15 @@ hapi:
       ch-elm:
         name: ch.fhir.ig.ch-elm
         version: 1.8.0
+        url: https://fhir.ch/ig/ch-elm/package.tgz
+        # always provide url, otherwise integration tests will fail
 matchbox:
   fhir:
     context:
       txServer: http://localhost:${server.port}/matchboxv3/fhir
       #      txServer: http://tx.fhir.org
       #      txServer: n/a
-      igsPreloaded: ch.fhir.ig.ch-elm#1.8.0-cibuild
+      igsPreloaded: ch.fhir.ig.ch-elm#1.8.0
       #txServer: n/a
       suppressWarnInfo:
         hl7.fhir.r4.core#4.0.1:
