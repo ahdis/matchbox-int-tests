@@ -4,7 +4,7 @@ import ch.ahdis.matchbox.engine.MatchboxEngine;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.utilities.FhirPublication;
-import org.hl7.fhir.utilities.TextFile;
+import org.hl7.fhir.utilities.FileUtilities;
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.utilities.npm.NpmPackage;
 import org.hl7.fhir.r5.context.BaseWorkerContext;
@@ -171,13 +171,13 @@ public class IgValidationTests {
 			if (examples) {
 				for (String s : pi.list("example")) {
 					if (process(s)) {
-						res.put(s, TextFile.streamToBytes(pi.load("example", s)));
+						res.put(s, FileUtilities.streamToBytes(pi.load("example", s)));
 					}
 				}
 			} else {
 				for (String s : pi.list("package")) {
 					if (process(s)) {
-						res.put(s, TextFile.streamToBytes(pi.load("package", s)));
+						res.put(s, FileUtilities.streamToBytes(pi.load("package", s)));
 					}
 				}
 			}

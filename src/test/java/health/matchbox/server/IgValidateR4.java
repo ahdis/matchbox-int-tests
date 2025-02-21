@@ -16,7 +16,7 @@ import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.TestScript.TestActionComponent;
 import org.hl7.fhir.r4.model.TestScript;
 import org.hl7.fhir.r4.model.TestScript.TestScriptTestComponent;
-import org.hl7.fhir.utilities.TextFile;
+import org.hl7.fhir.utilities.FileUtilities;
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.utilities.npm.NpmPackage;
 import org.junit.jupiter.api.BeforeAll;
@@ -311,14 +311,14 @@ public class IgValidateR4 {
 			if (examples) {
 				for (String s : pi.list("example")) {
 					if (process(s)) {
-						res.put(s, TextFile.streamToBytes(pi.load("example", s)));
+						res.put(s, FileUtilities.streamToBytes(pi.load("example", s)));
 					}
 				}
 			} 
 			if (canonical) {
 				for (String s : pi.list("package")) {
 					if (process(s)) {
-						res.put(s, TextFile.streamToBytes(pi.load("package", s)));
+						res.put(s, FileUtilities.streamToBytes(pi.load("package", s)));
 					}
 				}
 			}
