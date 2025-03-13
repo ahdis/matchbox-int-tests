@@ -2,7 +2,6 @@ package health.matchbox.server;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.jpa.starter.Application;
 import org.apache.commons.io.FileUtils;
@@ -11,6 +10,8 @@ import org.hl7.fhir.r4.model.OperationOutcome;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -36,10 +37,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @ActiveProfiles("validate-r4-auto-install")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @DirtiesContext
-public class IgValidateR4AutoInstallTests {
+class IgValidateR4AutoInstallTests {
+	private static final Logger log = LoggerFactory.getLogger(IgValidateR4AutoInstallTests.class);
 
 	private final String targetServer = "http://localhost:8086/matchboxv3/fhir";
-	final FhirContext contextR4 = FhirVersionEnum.R4.newContextCached();
+	final FhirContext contextR4 = FhirContext.forR4Cached();
 	final ValidationClient validationClient = new ValidationClient(this.contextR4, this.targetServer);
 
 	@BeforeAll
@@ -52,7 +54,7 @@ public class IgValidateR4AutoInstallTests {
 	 * In this test, we validate an IPS resource and specify the IG and its version.
 	 */
 	@Test
-	public void validateIps() throws Exception {
+	void validateIps() throws Exception {
 		final String bundle = this.getContent("ips-minimal-err-patnobirthdate.json");
 
 		IBaseOperationOutcome operationOutcome = this.validationClient.validate(
@@ -61,7 +63,7 @@ public class IgValidateR4AutoInstallTests {
 			"hl7.fhir.uv.ips#1.1.0"
 		);
 		final String sessionId = this.getSessionId(operationOutcome);
-		assertTrue(IgValidateR4.getValidationFailures((OperationOutcome) operationOutcome)>1);
+		assertTrue(IgValidateR4.getValidationFailures((OperationOutcome) operationOutcome) > 1);
 		assertEquals("hl7.fhir.uv.ips#1.1.0", this.getIg(operationOutcome));
 
 		operationOutcome = this.validationClient.validate(
@@ -70,7 +72,7 @@ public class IgValidateR4AutoInstallTests {
 			"hl7.fhir.uv.ips#1.1.0"
 		);
 		assertEquals(sessionId, this.getSessionId(operationOutcome));
-		assertTrue(IgValidateR4.getValidationFailures((OperationOutcome) operationOutcome)>1);
+		assertTrue(IgValidateR4.getValidationFailures((OperationOutcome) operationOutcome) > 1);
 	}
 
 	/**
@@ -78,7 +80,7 @@ public class IgValidateR4AutoInstallTests {
 	 * BALP version to be used.
 	 */
 	@Test
-	public void validateBalp() throws Exception {
+	void validateBalp() throws Exception {
 		final String auditEvent = this.getContent("AuditEvent-ex-auditPrivacyDisclosure-recipient.json");
 
 		IBaseOperationOutcome operationOutcome = this.validationClient.validate(
@@ -102,7 +104,7 @@ public class IgValidateR4AutoInstallTests {
 	 * right IG version to be used.
 	 */
 	@Test
-	public void validateChCore() throws Exception {
+	void validateChCore() throws Exception {
 		final String patient = this.getContent("Patient-UpiEprTestKrcmarevic.json");
 
 		IBaseOperationOutcome operationOutcome = this.validationClient.validate(
@@ -129,6 +131,10 @@ public class IgValidateR4AutoInstallTests {
 
 	private String getSessionId(IBaseOperationOutcome outcome) {
 		IBaseExtension<?, ?> ext = this.getMatchboxValidationExtension(outcome);
+		if (ext == null) {
+			log.error("Can't find the sessionId in the OperationOutcome:");
+			log.error(this.contextR4.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		}
 		List<IBaseExtension<?, ?>> extensions = (List<IBaseExtension<?, ?>>) ext.getExtension();
 		for (IBaseExtension<?, ?> next : extensions) {
 			if (next.getUrl().equals("sessionId")) {
@@ -141,6 +147,10 @@ public class IgValidateR4AutoInstallTests {
 
 	private String getIg(IBaseOperationOutcome outcome) {
 		IBaseExtension<?, ?> ext = this.getMatchboxValidationExtension(outcome);
+		if (ext == null) {
+			log.error("Can't find the ig in the OperationOutcome:");
+			log.error(this.contextR4.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		}
 		List<IBaseExtension<?, ?>> extensions = (List<IBaseExtension<?, ?>>) ext.getExtension();
 		for (IBaseExtension<?, ?> next : extensions) {
 			if (next.getUrl().equals("ig")) {
@@ -161,7 +171,7 @@ public class IgValidateR4AutoInstallTests {
 		if (issues.isEmpty()) {
 			return null;
 		}
-		IBase issue = issues.get(0);
+		IBase issue = issues.getFirst();
 		if (issue instanceof IBaseHasExtensions) {
 			List<? extends IBaseExtension<?, ?>> extensions = ((IBaseHasExtensions) issue).getExtension();
 			for (IBaseExtension<?, ?> nextSource : extensions) {
