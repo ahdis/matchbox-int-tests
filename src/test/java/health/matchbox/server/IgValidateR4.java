@@ -1,20 +1,18 @@
 package health.matchbox.server;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.jpa.packages.loader.PackageLoaderSvc;
 import ca.uhn.fhir.jpa.starter.AppProperties;
 import ch.ahdis.matchbox.util.PackageCacheInitializer;
 import health.matchbox.util.ValidationClient;
-
 import org.hl7.fhir.exceptions.FHIRFormatError;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Binary;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Resource;
-import org.hl7.fhir.r4.model.TestScript.TestActionComponent;
 import org.hl7.fhir.r4.model.TestScript;
+import org.hl7.fhir.r4.model.TestScript.TestActionComponent;
 import org.hl7.fhir.r4.model.TestScript.TestScriptTestComponent;
 import org.hl7.fhir.utilities.FileUtilities;
 import org.hl7.fhir.utilities.Utilities;
@@ -32,18 +30,10 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * see https://www.baeldung.com/springjunit4classrunner-parameterized read the
@@ -81,14 +71,14 @@ public class IgValidateR4 {
 	@BeforeAll
 	public static synchronized void beforeAll() throws Exception {
 		Thread.sleep(40000); // give the server some time to start up
-		FhirContext contextR4 = FhirVersionEnum.R4.newContextCached();
+		FhirContext contextR4 = FhirContext.forR4Cached();
 		validationClient = new ValidationClient(contextR4, TARGET_SERVER);
 		validationClient.capabilities();
 	}
 
 	public Stream<Arguments> provideResources() throws Exception {
 
-		String propertyString =  "";
+		String propertyString = "";
 		ActiveProfiles classAnnotation = this.getClass().getAnnotation(ActiveProfiles.class);
 		if (classAnnotation != null) {
 			propertyString = classAnnotation.value()[0];
@@ -96,8 +86,8 @@ public class IgValidateR4 {
 			log.error("property not found in @ActiveProfile annotation");
 			return null;
 		}
-		String path =  "/application-" + propertyString + ".yaml";
-	  
+		String path = "/application-" + propertyString + ".yaml";
+
 		Map<String, Object> obj = new Yaml().load(getClass().getResourceAsStream(path));
 		final List<AppProperties.ImplementationGuide> igs = PackageCacheInitializer.getIgs(obj, true);
 		List<Arguments> arguments = new ArrayList<>();
@@ -117,24 +107,23 @@ public class IgValidateR4 {
 					else
 						throw new Exception("Unsupported format for " + fn);
 					if (r != null) {
-						if (r instanceof TestScript) {
-							TestScript testScript = (TestScript) r;
+						if (r instanceof final TestScript testScript) {
 							testScript.getFixture().forEach(fixture -> {
 								if (fixture.getResource() != null && fixture.getResource().getReference() != null) {
 									String ref = fixture.getResource().getReference();
 									Resource resource = null;
 									if (!ref.startsWith("http") || !ref.startsWith("#") || !ref.startsWith("urn")) {
-											String refchangelink = ref.replace("/", "-")+".json";
-											resource = source.entrySet().stream()
-													.filter(e -> e.getKey().equals(refchangelink)).map(e -> {
-														try {
-															return new org.hl7.fhir.r4.formats.JsonParser()
-																	.parse(new ByteArrayInputStream(e.getValue()));
-														} catch (FHIRFormatError | IOException e1) {
-															log.error("error parsing " + e.getKey(), e1);
-															return null;
-														}
-													}).findFirst().get();
+										String refchangelink = ref.replace("/", "-") + ".json";
+										resource = source.entrySet().stream()
+											.filter(e -> e.getKey().equals(refchangelink)).map(e -> {
+												try {
+													return new org.hl7.fhir.r4.formats.JsonParser()
+														.parse(new ByteArrayInputStream(e.getValue()));
+												} catch (FHIRFormatError | IOException e1) {
+													log.error("error parsing " + e.getKey(), e1);
+													return null;
+												}
+											}).findFirst().get();
 										if (resource != null) {
 											resource.setId(fixture.getId());
 											testScript.getContained().add(resource);
@@ -152,18 +141,20 @@ public class IgValidateR4 {
 		}
 		return arguments.stream();
 	}
-	
+
 	public void testValidate(String name, Resource resource) throws Exception {
 		if (resource instanceof TestScript) {
 			runTestScript(name, (TestScript) resource);
-			return ;
+			return;
 		}
 		OperationOutcome outcome = doValidate(name, resource);
 		int fails = getValidationFailures(outcome);
 		if (fails > 0) {
 			String responseInJson = new org.hl7.fhir.r4.formats.JsonParser().composeString(outcome);
 			String resourceInJson = new org.hl7.fhir.r4.formats.JsonParser().composeString(resource);
-			assertEquals(0, fails, "Validation Errors " + fails + "\noutcome:\n" + responseInJson + "\nresource\n" + resourceInJson);
+			assertEquals(0,
+							 fails,
+							 "Validation Errors " + fails + "\noutcome:\n" + responseInJson + "\nresource\n" + resourceInJson);
 		}
 		assertEquals(0, fails);
 	}
@@ -179,7 +170,8 @@ public class IgValidateR4 {
 		}
 		String params = action.getOperation().getParams();
 		String profile = null;
-		Optional<String> optProfile = Arrays.stream(params.split("&")).filter(p -> p.startsWith("profile=")).map(e -> e.substring(8)).findFirst();
+		Optional<String> optProfile = Arrays.stream(params.split("&")).filter(p -> p.startsWith("profile=")).map(e -> e.substring(
+			8)).findFirst();
 		if (optProfile.isPresent()) {
 			profile = optProfile.get();
 		} else {
@@ -191,20 +183,21 @@ public class IgValidateR4 {
 
 	public void runTestScript(String name, TestScript resource) throws Exception {
 		// for each test in resource run the test
-		FhirContext contextR4 = FhirVersionEnum.R4.newContextCached();
+		FhirContext contextR4 = FhirContext.forR4Cached();
 		IFhirPath fhirPath = contextR4.newFhirPath();
-		Resource response = null;		
+		Resource response = null;
 		String responseInJson = null;
-		for (TestScriptTestComponent test: resource.getTest()) {
-			for (TestActionComponent action: test.getAction()) {
+		for (TestScriptTestComponent test : resource.getTest()) {
+			for (TestActionComponent action : test.getAction()) {
 				if (action.hasOperation()) {
-					if (action.getOperation().getType()!=null && action.getOperation().getType().getCode().equals("validate")) {
+					if (action.getOperation().getType() != null && action.getOperation().getType().getCode().equals(
+						"validate")) {
 						response = validate(resource, action);
 						responseInJson = new org.hl7.fhir.r4.formats.JsonParser().composeString(response);
 					} else {
 						fail("unsupported operation " + action.getOperation());
 					}
-				} 
+				}
 				if (action.hasAssert()) {
 					if (action.getAssert().hasResponseCode()) {
 						if (action.getAssert().getResponseCode().equals("200")) {
@@ -217,10 +210,14 @@ public class IgValidateR4 {
 					if (action.getAssert().hasExpression()) {
 						String expressionFhirPath = action.getAssert().getExpression();
 						try {
-							assertEquals(action.getAssert().getValue(), fhirPath.evaluateFirst(response, expressionFhirPath, IPrimitiveType.class).get().getValueAsString(), "expression:\n"+expressionFhirPath+"\nresource:\n"+responseInJson);
+							assertEquals(action.getAssert().getValue(),
+											 fhirPath.evaluateFirst(response,
+																			expressionFhirPath,
+																			IPrimitiveType.class).get().getValueAsString(),
+											 "expression:\n" + expressionFhirPath + "\nresource:\n" + responseInJson);
 							continue;
 						} catch (ca.uhn.fhir.fhirpath.FhirPathExecutionException e) {
-							fail("error evaluating expression " + expressionFhirPath  + e.getMessage());
+							fail("error evaluating expression " + expressionFhirPath + e.getMessage());
 						}
 					}
 					fail("unsupported assert, not implemented yet " + action.getAssert());
@@ -257,35 +254,31 @@ public class IgValidateR4 {
 	}
 
 	protected String determineProfileToValidate(String name, Resource resource) {
-		if (resource.getMeta()!=null && resource.getMeta().getProfile()!=null && resource.getMeta().getProfile().size()>0) {
+		if (resource.getMeta() != null && resource.getMeta().getProfile() != null && resource.getMeta().getProfile().size() > 0) {
 			return resource.getMeta().getProfile().get(0).getValue();
 		}
-		return  "http://hl7.org/fhir/StructureDefinition/"+resource.getResourceType();	
+		return "http://hl7.org/fhir/StructureDefinition/" + resource.getResourceType();
 	}
 
 	protected boolean exemptFile(String fn, String ig) {
 		if (Utilities.existsInList(fn, "spec.internals", "version.info", "schematron.zip", "package.json")) {
 			return true;
 		}
-		if ((fn.startsWith("StructureDefinition") || fn.startsWith("ValueSet") || fn.startsWith("CodeSystem") || fn.startsWith("Parameters") || fn.startsWith("OperationDefinition"))) {
+		if ((fn.startsWith("StructureDefinition") || fn.startsWith("ValueSet") || fn.startsWith("CodeSystem") || fn.startsWith(
+			"Parameters") || fn.startsWith("OperationDefinition"))) {
 			return true;
 		}
-		if (ig.startsWith("hl7.fhir.uv.extensions")) {
-			return true;
-		}
-		return false;
+		return ig.startsWith("hl7.fhir.uv.extensions");
 	}
 
 	public static org.hl7.fhir.r4.model.Resource removeHtml(org.hl7.fhir.r4.model.Resource r) {
-		if (r instanceof org.hl7.fhir.r4.model.DomainResource) {
-			org.hl7.fhir.r4.model.DomainResource dr = (org.hl7.fhir.r4.model.DomainResource) r;
+		if (r instanceof final org.hl7.fhir.r4.model.DomainResource dr) {
 			dr.setText(null);
 			for (org.hl7.fhir.r4.model.Resource c : dr.getContained()) {
 				removeHtml(c);
 			}
 		}
-		if (r instanceof org.hl7.fhir.r4.model.Bundle) {
-			org.hl7.fhir.r4.model.Bundle dr = (org.hl7.fhir.r4.model.Bundle) r;
+		if (r instanceof final org.hl7.fhir.r4.model.Bundle dr) {
 			for (org.hl7.fhir.r4.model.Bundle.BundleEntryComponent entry : dr.getEntry()) {
 				removeHtml(entry.getResource());
 			}
@@ -294,7 +287,7 @@ public class IgValidateR4 {
 	}
 
 	static private Map<String, byte[]> fetchByPackage(AppProperties.ImplementationGuide src, boolean examples)
-			throws Exception {
+		throws Exception {
 		String thePackageUrl = src.getUrl();
 		if (thePackageUrl == null) {
 			return new HashMap<>(0);
@@ -314,7 +307,7 @@ public class IgValidateR4 {
 						res.put(s, FileUtilities.streamToBytes(pi.load("example", s)));
 					}
 				}
-			} 
+			}
 			if (canonical) {
 				for (String s : pi.list("package")) {
 					if (process(s)) {

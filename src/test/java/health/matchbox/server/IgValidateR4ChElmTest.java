@@ -1,23 +1,19 @@
 package health.matchbox.server;
 
+import ca.uhn.fhir.jpa.starter.Application;
 import org.hl7.fhir.r4.model.Resource;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 
-import ca.uhn.fhir.jpa.starter.Application;
-
 /**
- * see https://www.baeldung.com/springjunit4classrunner-parameterized read the
- * implementation guides defined in ig and
+ * see https://www.baeldung.com/springjunit4classrunner-parameterized read the implementation guides defined in ig and
  * execute the validations
  * <p>
  * It uses the port 8082.
@@ -25,13 +21,11 @@ import ca.uhn.fhir.jpa.starter.Application;
  * @author oliveregger
  **/
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
-@ContextConfiguration(classes = { Application.class })
+@ContextConfiguration(classes = {Application.class})
 @ActiveProfiles("validate-r4-ch-elm")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @DirtiesContext
 public class IgValidateR4ChElmTest extends IgValidateR4 {
-
-	private static final Logger log = LoggerFactory.getLogger(IgValidateR4ChElmTest.class);
 
 	@Override
 	protected String determineProfileToValidate(String name, Resource resource) {
@@ -47,7 +41,7 @@ public class IgValidateR4ChElmTest extends IgValidateR4 {
 				Assumptions.abort("Ignoring validation for " + name + " since no profile found");
 			}
 		} else {
-			profile = resource.getMeta().getProfile().get(0).getValue();
+			profile = resource.getMeta().getProfile().getFirst().getValue();
 		}
 		return profile;
 	}
@@ -69,10 +63,7 @@ public class IgValidateR4ChElmTest extends IgValidateR4 {
 		if (fn.startsWith("DocumentReference-1-DocumentReferenceResponseCompleted")) {
 			return true;
 		}
-		if (fn.startsWith("DocumentReference-1-DocumentReferenceResponseInProgress")) {
-			return true;
-		}
-		return false;
+		return fn.startsWith("DocumentReference-1-DocumentReferenceResponseInProgress");
 	}
 
 	@ParameterizedTest(name = "{0}")

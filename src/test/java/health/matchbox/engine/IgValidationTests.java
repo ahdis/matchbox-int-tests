@@ -1,5 +1,6 @@
 package health.matchbox.engine;
 
+import ca.uhn.fhir.jpa.packages.loader.PackageLoaderSvc;
 import ch.ahdis.matchbox.engine.MatchboxEngine;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Resource;
@@ -7,7 +8,6 @@ import org.hl7.fhir.utilities.FhirPublication;
 import org.hl7.fhir.utilities.FileUtilities;
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.utilities.npm.NpmPackage;
-import org.hl7.fhir.r5.context.BaseWorkerContext;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -15,8 +15,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import ca.uhn.fhir.jpa.packages.loader.PackageLoaderSvc;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -55,8 +53,8 @@ public class IgValidationTests {
 
 	public IgValidationTests() throws IOException, URISyntaxException {
 		this.engine = this.getEngine();
-		this.engine.initTxCache(System.getProperty("user.dir")+ File.separator + "txCache");
-		((BaseWorkerContext) this.engine.getContext()).setCachingAllowed(true);
+		this.engine.initTxCache(System.getProperty("user.dir") + File.separator + "txCache");
+		this.engine.getContext().setCachingAllowed(true);
 		PackageLoaderSvc loader = new PackageLoaderSvc();
 		for (final String ig : IGS) {
 			InputStream inputStream = new ByteArrayInputStream(loader.loadPackageUrlContents(ig));
@@ -96,16 +94,14 @@ public class IgValidationTests {
 	}
 
 	public static org.hl7.fhir.r4.model.Resource removeHtml(org.hl7.fhir.r4.model.Resource r) {
-		if (r instanceof org.hl7.fhir.r4.model.DomainResource) {
-			org.hl7.fhir.r4.model.DomainResource dr = (org.hl7.fhir.r4.model.DomainResource) r;
+		if (r instanceof final org.hl7.fhir.r4.model.DomainResource dr) {
 			dr.setText(null);
-			for(org.hl7.fhir.r4.model.Resource c : dr.getContained()) {
+			for (org.hl7.fhir.r4.model.Resource c : dr.getContained()) {
 				removeHtml(c);
 			}
 		}
-		if (r instanceof org.hl7.fhir.r4.model.Bundle) {
-			org.hl7.fhir.r4.model.Bundle dr = (org.hl7.fhir.r4.model.Bundle) r;
-			for(org.hl7.fhir.r4.model.Bundle.BundleEntryComponent entry : dr.getEntry()) {
+		if (r instanceof final org.hl7.fhir.r4.model.Bundle dr) {
+			for (org.hl7.fhir.r4.model.Bundle.BundleEntryComponent entry : dr.getEntry()) {
 				removeHtml(entry.getResource());
 			}
 		}
