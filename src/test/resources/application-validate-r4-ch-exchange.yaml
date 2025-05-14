@@ -61,10 +61,10 @@ hapi:
         name: ch.fhir.ig.ch-allergyintolerance
         version: 3.0.0
         url: https://fhir.ch/ig/ch-allergyintolerance/package.tgz
-      ch-lab-report:
-        name: ch.fhir.ig.ch-lab-report
-        version: 1.0.0       
-        url: https://fhir.ch/ig/ch-lab-report/package.tgz
+#      ch-lab-report:
+#        name: ch.fhir.ig.ch-lab-report
+#        version: 1.0.0       
+#        url: https://fhir.ch/ig/ch-lab-report/package.tgz
 matchbox:
   fhir:
     context:
