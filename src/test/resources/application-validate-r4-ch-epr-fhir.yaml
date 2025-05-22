@@ -73,7 +73,7 @@ hapi:
       ch-epr-fhir:
         name: ch.fhir.ig.ch-epr-fhir
         version: 4.0.1
-        url: https://fhir.ch/ig/ch-epr-fhir/package.tgz
+        url: https://fhir.ch/ig/ch-epr-fhir/4.0.1/package.tgz
 matchbox:
   fhir:
     context:
