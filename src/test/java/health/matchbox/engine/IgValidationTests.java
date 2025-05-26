@@ -40,11 +40,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class IgValidationTests {
 	private static final Logger log = LoggerFactory.getLogger(IgValidationTests.class);
 
-	private static final String EMED = "https://fhir.ch/ig/ch-emed/package.tgz";
+	private static final String EMED = "https://fhir.ch/ig/ch-emed/5.0.0/package.tgz";
 	private static final List<String> IGS = List.of(
-		"https://profiles.ihe.net/fhir/ihe.formatcode.fhir/package.tgz",
-		"https://fhir.ch/ig/ch-term/package.tgz",
-		"https://fhir.ch/ig/ch-core/package.tgz",
+		"https://fhir.ch/ig/ch-core/5.0.0/package.tgz",
 		EMED
 	);
 

@@ -68,6 +68,7 @@ hapi:
 matchbox:
   fhir:
     context:
+      httpReadOnly: true
       #      txServer: http://localhost:${server.port}/matchboxv3/fhir
       txServer: http://tx.fhir.org
       suppressWarnInfo:
