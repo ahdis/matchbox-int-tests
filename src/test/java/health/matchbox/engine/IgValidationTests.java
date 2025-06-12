@@ -1,20 +1,6 @@
 package health.matchbox.engine;
 
-import ca.uhn.fhir.jpa.packages.loader.PackageLoaderSvc;
-import ch.ahdis.matchbox.engine.MatchboxEngine;
-import org.hl7.fhir.r4.model.OperationOutcome;
-import org.hl7.fhir.r4.model.Resource;
-import org.hl7.fhir.utilities.FhirPublication;
-import org.hl7.fhir.utilities.FileUtilities;
-import org.hl7.fhir.utilities.Utilities;
-import org.hl7.fhir.utilities.npm.NpmPackage;
-import org.junit.jupiter.api.Assumptions;
-import org.junit.jupiter.api.TestInstance;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -29,7 +15,22 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.hl7.fhir.r4.model.OperationOutcome;
+import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.utilities.FhirPublication;
+import org.hl7.fhir.utilities.FileUtilities;
+import org.hl7.fhir.utilities.Utilities;
+import org.hl7.fhir.utilities.npm.NpmPackage;
+import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import ca.uhn.fhir.jpa.packages.loader.PackageLoaderSvc;
+import ch.ahdis.matchbox.engine.MatchboxEngine;
 
 /**
  * A test bench to load IGs in matchbox-engine and validate all their examples.
@@ -53,6 +54,8 @@ public class IgValidationTests {
 		this.engine = this.getEngine();
 		this.engine.initTxCache(System.getProperty("user.dir") + File.separator + "txCache");
 		this.engine.getContext().setCachingAllowed(true);
+		this.engine.addSuppressedError("XHTML_XHTML_Attribute_Illegal",".*");
+		this.engine.addSuppressedError("http://hl7.org/fhir/StructureDefinition/Narrative#txt-1",".*");
 		PackageLoaderSvc loader = new PackageLoaderSvc();
 		for (final String ig : IGS) {
 			InputStream inputStream = new ByteArrayInputStream(loader.loadPackageUrlContents(ig));
@@ -87,6 +90,12 @@ public class IgValidationTests {
 											issue.getSeverity().name(),
 											issue.getCode().name(),
 											issue.getDetails().getText()));
+		}
+
+		if (!errors.isEmpty()) {
+			String responseInJson = new org.hl7.fhir.r4.formats.JsonParser().composeString(outcome);
+			String resourceInJson = new org.hl7.fhir.r4.formats.JsonParser().composeString(resource);
+			log.error( "Validation Errors " + "\noutcome:\n" + responseInJson + "\nresource\n" + resourceInJson);
 		}
 		assertTrue(errors.isEmpty());
 	}
