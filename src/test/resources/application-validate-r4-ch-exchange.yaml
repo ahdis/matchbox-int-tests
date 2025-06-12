@@ -74,3 +74,12 @@ matchbox:
       suppressWarnInfo:
         hl7.fhir.r4.core#4.0.1:
           - "Constraint failed: dom-6:"
+      suppressError:
+        hl7.fhir.r4.core#4.0.1:
+          - "Extension_EXTP_Context_Wrong@^RelatedPerson"
+        ch.fhir.ig.ch-emed:
+          - "XHTML_XHTML_Attribute_Illegal"
+          - "http://hl7.org/fhir/StructureDefinition/Narrative#txt-1"
+        ch.fhir.ig.ch-ips:
+          - "XHTML_XHTML_Attribute_Illegal"
+          - "http://hl7.org/fhir/StructureDefinition/Narrative#txt-1"
