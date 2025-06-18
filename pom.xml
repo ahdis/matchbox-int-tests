@@ -19,7 +19,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>21</java.version>
-        <matchbox.version>4.0.4</matchbox.version>
+        <matchbox.version>4.0.6</matchbox.version>
     </properties>
 
     <dependencyManagement>
