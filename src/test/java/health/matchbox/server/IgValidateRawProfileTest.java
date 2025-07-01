@@ -52,7 +52,7 @@ public class IgValidateRawProfileTest {
 
 	@Test
 	public void validateRaw() {
-		FhirContext contextR4 = FhirContext.forR4Cached()();
+		FhirContext contextR4 = FhirContext.forR4Cached();
 		ValidationClient validationClient = new ValidationClient(contextR4, this.targetServer);
 		String patient = "<Patient xmlns=\"http://hl7.org/fhir\">\n" + "            <id value=\"example\"/>\n"
 			+ "            <text>\n" + "               <status value=\"generated\"/>\n"
