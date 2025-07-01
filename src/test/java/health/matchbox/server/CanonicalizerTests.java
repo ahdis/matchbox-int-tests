@@ -35,7 +35,7 @@ public class CanonicalizerTests {
 		String contentString = "";
 		contentString = this.getContent("canonicalize-elements.json");
 
-		FhirContext contextR4 = FhirVersionEnum.R4.newContextCached();
+		FhirContext contextR4 = FhirContext.forR4Cached();
 
 		IBaseResource resource = contextR4.newJsonParser().parseResource(contentString);
 		Canonicalizer canonicalizer = new Canonicalizer(contextR4);
@@ -61,7 +61,7 @@ public class CanonicalizerTests {
 		String contentString = "";
 		contentString = this.getContent("canonicalize-patient.json");
 
-		FhirContext contextR4 = FhirVersionEnum.R4.newContextCached();
+		FhirContext contextR4 = FhirContext.forR4Cached();
 		IBaseResource resource = contextR4.newJsonParser().parseResource(contentString);
 
 		Canonicalizer canonicalizer = new Canonicalizer(contextR4);
@@ -90,7 +90,7 @@ public class CanonicalizerTests {
 		String contentString = "";
 		contentString = this.getContent("canonicalize-chargeitem.json");
 
-		FhirContext contextR4 = FhirVersionEnum.R4.newContextCached();
+		FhirContext contextR4 = FhirContext.forR4Cached();
 		IBaseResource resource = contextR4.newJsonParser().parseResource(contentString);
 
 		Canonicalizer canonicalizer = new Canonicalizer(contextR4);
