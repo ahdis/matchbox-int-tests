@@ -1,5 +1,6 @@
 package health.matchbox.util;
 
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.opentest4j.AssertionFailedError;
 
@@ -39,7 +40,11 @@ public class ValidationUtil {
 	public static String toString(final OperationOutcome.OperationOutcomeIssueComponent issue) {
 		return "[%s][%s] %s %s".formatted(issue.getSeverity(),
 													 issue.getCode(),
-													 issue.getDiagnostics(),
-											 		 issue.getDetails().getText());
+													 stringOrEmpty(issue.getDiagnostics()),
+													 stringOrEmpty(issue.getDetails().getText()));
+	}
+
+	public static String stringOrEmpty(final @Nullable String string) {
+		return (string == null || string.isBlank()) ? "" : string;
 	}
 }
