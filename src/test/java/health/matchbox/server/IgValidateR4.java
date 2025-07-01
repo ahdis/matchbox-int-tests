@@ -33,6 +33,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Stream;
 
+import static health.matchbox.util.ValidationUtil.getValidationFailures;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -52,21 +53,6 @@ public class IgValidateR4 {
 	@Autowired
 	ApplicationContext context;
 	private static ValidationClient validationClient;
-
-	static public int getValidationFailures(OperationOutcome outcome) {
-		int fails = 0;
-		if (outcome != null && outcome.getIssue() != null) {
-			for (OperationOutcome.OperationOutcomeIssueComponent issue : outcome.getIssue()) {
-				if (OperationOutcome.IssueSeverity.FATAL == issue.getSeverity()) {
-					++fails;
-				}
-				if (OperationOutcome.IssueSeverity.ERROR == issue.getSeverity()) {
-					++fails;
-				}
-			}
-		}
-		return fails;
-	}
 
 	@BeforeAll
 	public static synchronized void beforeAll() throws Exception {

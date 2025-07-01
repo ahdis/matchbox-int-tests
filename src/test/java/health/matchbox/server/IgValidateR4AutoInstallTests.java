@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.jpa.starter.Application;
+import health.matchbox.util.ValidationUtil;
 import org.apache.commons.io.FileUtils;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.r4.model.OperationOutcome;
@@ -63,7 +64,7 @@ class IgValidateR4AutoInstallTests {
 			"hl7.fhir.uv.ips#1.1.0"
 		);
 		final String sessionId = this.getSessionId(operationOutcome);
-		assertTrue(IgValidateR4.getValidationFailures((OperationOutcome) operationOutcome) > 1);
+		assertTrue(ValidationUtil.getValidationFailures((OperationOutcome) operationOutcome) > 1);
 		assertEquals("hl7.fhir.uv.ips#1.1.0", this.getIg(operationOutcome));
 
 		operationOutcome = this.validationClient.validate(
@@ -72,7 +73,7 @@ class IgValidateR4AutoInstallTests {
 			"hl7.fhir.uv.ips#1.1.0"
 		);
 		assertEquals(sessionId, this.getSessionId(operationOutcome));
-		assertTrue(IgValidateR4.getValidationFailures((OperationOutcome) operationOutcome) > 1);
+		assertTrue(ValidationUtil.getValidationFailures((OperationOutcome) operationOutcome) > 1);
 	}
 
 	/**
@@ -88,7 +89,7 @@ class IgValidateR4AutoInstallTests {
 			"https://profiles.ihe.net/ITI/BALP/StructureDefinition/IHE.BasicAudit.PrivacyDisclosure.Recipient"
 		);
 		final String sessionId = this.getSessionId(operationOutcome);
-		assertEquals(0, IgValidateR4.getValidationFailures((OperationOutcome) operationOutcome));
+		ValidationUtil.assertNoValidationFailure((OperationOutcome) operationOutcome);
 		assertEquals("ihe.iti.balp#1.1.3", this.getIg(operationOutcome));
 
 		operationOutcome = this.validationClient.validate(
@@ -96,7 +97,7 @@ class IgValidateR4AutoInstallTests {
 			"https://profiles.ihe.net/ITI/BALP/StructureDefinition/IHE.BasicAudit.PrivacyDisclosure.Recipient"
 		);
 		assertEquals(sessionId, this.getSessionId(operationOutcome));
-		assertEquals(0, IgValidateR4.getValidationFailures((OperationOutcome) operationOutcome));
+		ValidationUtil.assertNoValidationFailure((OperationOutcome) operationOutcome);
 	}
 
 	/**
@@ -112,7 +113,7 @@ class IgValidateR4AutoInstallTests {
 			"http://fhir.ch/ig/ch-core/StructureDefinition/ch-core-patient|4.0.1"
 		);
 		final String sessionId = this.getSessionId(operationOutcome);
-		assertEquals(0, IgValidateR4.getValidationFailures((OperationOutcome) operationOutcome));
+		ValidationUtil.assertNoValidationFailure((OperationOutcome) operationOutcome);
 		assertEquals("ch.fhir.ig.ch-core#4.0.1", this.getIg(operationOutcome));
 
 		operationOutcome = this.validationClient.validate(
@@ -120,7 +121,8 @@ class IgValidateR4AutoInstallTests {
 			"http://fhir.ch/ig/ch-core/StructureDefinition/ch-core-patient|4.0.1"
 		);
 		assertEquals(sessionId, this.getSessionId(operationOutcome));
-		assertEquals(0, IgValidateR4.getValidationFailures((OperationOutcome) operationOutcome));
+
+		ValidationUtil.assertNoValidationFailure((OperationOutcome) operationOutcome);
 	}
 
 	private String getContent(String resourceName) throws IOException {

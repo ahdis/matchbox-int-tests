@@ -8,6 +8,7 @@ package health.matchbox.server;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.starter.Application;
+import health.matchbox.util.ValidationUtil;
 import org.apache.commons.io.FileUtils;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.r4.model.OperationOutcome;
@@ -25,10 +26,6 @@ import org.springframework.test.context.ContextConfiguration;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -64,10 +61,10 @@ public class IgValidateRawProfileTest {
 
 		IBaseOperationOutcome operationOutcome = validationClient.validate(patient,
 																								 "http://hl7.org/fhir/StructureDefinition/Patient");
-		assertEquals(0, IgValidateR4.getValidationFailures((OperationOutcome) operationOutcome));
+		ValidationUtil.assertNoValidationFailure((OperationOutcome) operationOutcome);
 		operationOutcome = validationClient.validate(patient,
 																	"http://hl7.org/fhir/StructureDefinition/Bundle");
-		assertEquals(1, IgValidateR4.getValidationFailures((OperationOutcome) operationOutcome));
+		assertEquals(1, ValidationUtil.getValidationFailures((OperationOutcome) operationOutcome));
 	}
 
 	@Test
@@ -84,7 +81,7 @@ public class IgValidateRawProfileTest {
 		IBaseOperationOutcome operationOutcome = validationClient.validate(getContent("ehs-431.json"),
 																								 "http://hl7.org/fhir/StructureDefinition/Bundle");
 		log.debug(contextR4.newJsonParser().encodeResourceToString(operationOutcome));
-		assertEquals(1, IgValidateR4.getValidationFailures((OperationOutcome) operationOutcome));
+		assertEquals(1, ValidationUtil.getValidationFailures((OperationOutcome) operationOutcome));
 	}
 
 	@Test
@@ -99,7 +96,7 @@ public class IgValidateRawProfileTest {
 		IBaseOperationOutcome operationOutcome = validationClient.validate(getContent("ehs-419.json"),
 																								 "http://hl7.org/fhir/StructureDefinition/Patient");
 		log.debug(contextR4.newJsonParser().encodeResourceToString(operationOutcome));
-		assertEquals(0, IgValidateR4.getValidationFailures((OperationOutcome) operationOutcome));
+		ValidationUtil.assertNoValidationFailure((OperationOutcome) operationOutcome);
 	}
 
 	private String getContent(String resourceName) throws IOException {
