@@ -36,6 +36,10 @@ public class IgValidateR4ChElmTest extends IgValidateR4 {
 			}
 			if (resource.getResourceType() == org.hl7.fhir.r4.model.ResourceType.DocumentReference) {
 				profile = "http://fhir.ch/ig/ch-elm/StructureDefinition/PublishDocumentReferenceStrict";
+				// pandemic case, do not validate according to strict profile
+				if (name.contains("example-foph-code")) {
+					profile = "http://fhir.ch/ig/ch-elm/StructureDefinition/PublishDocumentReference";
+				}
 			}
 			if (profile == null) {
 				Assumptions.abort("Ignoring validation for " + name + " since no profile found");

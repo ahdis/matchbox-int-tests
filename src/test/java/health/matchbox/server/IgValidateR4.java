@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.jpa.packages.loader.PackageLoaderSvc;
 import ca.uhn.fhir.jpa.starter.AppProperties;
+import ch.ahdis.matchbox.engine.MatchboxEngine;
 import ch.ahdis.matchbox.util.PackageCacheInitializer;
 import health.matchbox.util.ValidationClient;
 import org.hl7.fhir.exceptions.FHIRFormatError;
@@ -14,6 +15,7 @@ import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.TestScript;
 import org.hl7.fhir.r4.model.TestScript.TestActionComponent;
 import org.hl7.fhir.r4.model.TestScript.TestScriptTestComponent;
+import org.hl7.fhir.utilities.FhirPublication;
 import org.hl7.fhir.utilities.FileUtilities;
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.utilities.npm.NpmPackage;
@@ -29,6 +31,7 @@ import org.yaml.snakeyaml.Yaml;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Stream;
@@ -54,12 +57,25 @@ public class IgValidateR4 {
 	ApplicationContext context;
 	private static ValidationClient validationClient;
 
+	private static MatchboxEngine engine;
+
 	@BeforeAll
 	public static synchronized void beforeAll() throws Exception {
 		Thread.sleep(40000); // give the server some time to start up
 		FhirContext contextR4 = FhirContext.forR4Cached();
 		validationClient = new ValidationClient(contextR4, TARGET_SERVER);
 		validationClient.capabilities();
+		engine = getEngine();
+	}
+
+	private static MatchboxEngine getEngine() throws IOException, URISyntaxException {
+		final var newEngine = new MatchboxEngine.MatchboxEngineBuilder()
+			.getEngineR4();
+		newEngine.setTerminologyServer("http://tx.fhir.org", null, FhirPublication.R4, true);
+		newEngine.getContext().setCanRunWithoutTerminology(false);
+		newEngine.getContext().setNoTerminologyServer(false);
+		newEngine.setDisplayWarnings(true);
+		return newEngine;
 	}
 
 	public Stream<Arguments> provideResources() throws Exception {
@@ -169,8 +185,6 @@ public class IgValidateR4 {
 
 	public void runTestScript(String name, TestScript resource) throws Exception {
 		// for each test in resource run the test
-		FhirContext contextR4 = FhirContext.forR4Cached();
-		IFhirPath fhirPath = contextR4.newFhirPath();
 		Resource response = null;
 		String responseInJson = null;
 		for (TestScriptTestComponent test : resource.getTest()) {
@@ -196,10 +210,10 @@ public class IgValidateR4 {
 					if (action.getAssert().hasExpression()) {
 						String expressionFhirPath = action.getAssert().getExpression();
 						try {
+							String result = engine.evaluateFhirPath(responseInJson, true, expressionFhirPath);
+							log.debug("expression: " + expressionFhirPath + " result: " + result);
 							assertEquals(action.getAssert().getValue(),
-											 fhirPath.evaluateFirst(response,
-																			expressionFhirPath,
-																			IPrimitiveType.class).get().getValueAsString(),
+											 result,
 											 "expression:\n" + expressionFhirPath + "\nresource:\n" + responseInJson);
 							continue;
 						} catch (ca.uhn.fhir.fhirpath.FhirPathExecutionException e) {
