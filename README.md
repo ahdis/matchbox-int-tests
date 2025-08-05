@@ -9,3 +9,7 @@ zsh:  `mvn -DskipTests -P \!boot install`
 
 Then, these tests must be run with the matchbox version as parameter: `mvn -D'matchbox.version=3.9.13' clean site`
 or `mvn clean site`, then you can find the result in target/site/index.html
+
+Specific test: 
+
+mvn test -Dtest=IgValidateR4ChEprFhirTest
