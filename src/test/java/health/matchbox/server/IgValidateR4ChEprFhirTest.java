@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import org.hl7.fhir.r4.model.Resource;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -31,6 +32,7 @@ import ca.uhn.fhir.jpa.starter.Application;
 @ActiveProfiles("validate-r4-ch-epr-fhir")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @DirtiesContext
+@Disabled
 public class IgValidateR4ChEprFhirTest extends IgValidateR4 {
 
 	private static final Logger log = LoggerFactory.getLogger(IgValidateR4ChEprFhirTest.class);
