@@ -48,7 +48,7 @@ import static org.junit.jupiter.api.Assertions.*;
  *
  * @author oliveregger
  **/
-public class IgValidateR4 {
+abstract public class IgValidateR4 {
 
 
 	private static final String TARGET_SERVER = "http://localhost:8082/matchboxv3/fhir";
