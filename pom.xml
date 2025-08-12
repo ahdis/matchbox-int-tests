@@ -135,7 +135,7 @@
                         <usePhrasedClassNameInRunning>true</usePhrasedClassNameInRunning>
                         <usePhrasedClassNameInTestCaseSummary>true</usePhrasedClassNameInTestCaseSummary>
                     </statelessTestsetInfoReporter>
-                    <argLine>-Xmx3G -Xms3G</argLine>
+                    <argLine>-Xmx8g -Xms2g -XX:MaxMetaspaceSize=1g</argLine>
                 </configuration>
                 <executions>
                     <execution>
