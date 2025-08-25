@@ -13,3 +13,4 @@ or `mvn clean site`, then you can find the result in target/site/index.html
 Specific test: 
 
 mvn test -Dtest=IgValidateR4ChEprFhirTest
+mvn test -Dtest=IgValidateR4ChElmTest
