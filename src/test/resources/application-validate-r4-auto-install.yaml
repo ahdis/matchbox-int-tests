@@ -14,5 +14,5 @@ hapi:
 matchbox:
   fhir:
     context:
-      txServer: http://localhost:${server.port}/matchboxv3/fhir
+      txServer: http://localhost:${server.port}/matchboxv3/tx
       autoInstallMissingIgs: true

@@ -77,7 +77,7 @@ matchbox:
   fhir:
     context:
       httpReadOnly: true
-      #      txServer: http://localhost:${server.port}/matchboxv3/fhir
+      #      txServer: http://localhost:${server.port}/matchboxv3/tx
       txServer: http://tx.fhir.org
       #      txServer: n/a
       igsPreloaded: ch.fhir.ig.ch-epr-fhir#5.0.0-ballot
