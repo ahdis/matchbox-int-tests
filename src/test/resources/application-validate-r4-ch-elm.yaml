@@ -85,7 +85,8 @@ matchbox:
 #      igsPreloaded: ch.fhir.ig.ch-elm#1.9.0-ci-build
       httpReadOnly: true
       igsPreloaded: ch.fhir.ig.ch-elm#1.11.0
-      #txServerCache: false
+      txUseEcosystem: false
+       #txServerCache: false
       #txServer: n/a
       suppressWarnInfo:
         hl7.fhir.r4.core#4.0.1:
