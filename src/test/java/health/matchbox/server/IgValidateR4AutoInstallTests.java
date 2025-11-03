@@ -90,7 +90,7 @@ class IgValidateR4AutoInstallTests {
 		);
 		final String sessionId = this.getSessionId(operationOutcome);
 		ValidationUtil.assertNoValidationFailure((OperationOutcome) operationOutcome);
-		assertEquals("ihe.iti.balp#1.1.3", this.getIg(operationOutcome));
+		assertEquals("ihe.iti.balp#1.1.4", this.getIg(operationOutcome));
 
 		operationOutcome = this.validationClient.validate(
 			auditEvent,
