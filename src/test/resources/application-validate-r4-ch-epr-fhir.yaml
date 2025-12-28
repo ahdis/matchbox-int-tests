@@ -71,8 +71,8 @@ hapi:
         url: classpath:/hl7.fhir.uv.extensions.r4#5.2.0.tgz
       ch-epr-fhir:
         name: ch.fhir.ig.ch-epr-fhir
-        version: 5.0.0-ballot
-        url: https://fhir.ch/ig/ch-epr-fhir/5.0.0-ballot/package.tgz
+        version: 5.0.0
+        url: https://fhir.ch/ig/ch-epr-fhir/5.0.0/package.tgz
 matchbox:
   fhir:
     context:
@@ -80,7 +80,7 @@ matchbox:
       #      txServer: http://localhost:${server.port}/matchboxv3/tx
       txServer: http://tx.fhir.org
       #      txServer: n/a
-      igsPreloaded: ch.fhir.ig.ch-epr-fhir#5.0.0-ballot
+      igsPreloaded: ch.fhir.ig.ch-epr-fhir#5.0.0
       #txServer: n/a
       suppressWarnInfo:
         hl7.fhir.r4.core#4.0.1:
