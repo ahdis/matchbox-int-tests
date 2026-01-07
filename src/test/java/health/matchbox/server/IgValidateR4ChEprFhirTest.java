@@ -32,7 +32,6 @@ import ca.uhn.fhir.jpa.starter.Application;
 @ActiveProfiles("validate-r4-ch-epr-fhir")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @DirtiesContext
-@Disabled
 public class IgValidateR4ChEprFhirTest extends IgValidateR4 {
 
 	private static final Logger log = LoggerFactory.getLogger(IgValidateR4ChEprFhirTest.class);
@@ -43,10 +42,6 @@ public class IgValidateR4ChEprFhirTest extends IgValidateR4 {
 			return true;
 		}
 
-		if (fn.startsWith("AuditEvent-ex-auditProvideBundle-source")) {
-			// https://github.com/ehealthsuisse/ch-epr-fhir/issues/153
-			return true;
-		}
 		return false;
 	}
 
