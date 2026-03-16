@@ -41,9 +41,9 @@ import ch.ahdis.matchbox.engine.MatchboxEngine;
 public class IgValidationTests {
 	private static final Logger log = LoggerFactory.getLogger(IgValidationTests.class);
 
-	private static final String EMED = "https://fhir.ch/ig/ch-emed/5.0.0/package.tgz";
+	private static final String EMED = "https://fhir.ch/ig/ch-emed/6.0.0/package.tgz";
 	private static final List<String> IGS = List.of(
-		"https://fhir.ch/ig/ch-core/5.0.0/package.tgz",
+		"https://fhir.ch/ig/ch-core/6.0.0/package.tgz",
 		EMED
 	);
 
