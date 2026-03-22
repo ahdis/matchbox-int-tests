@@ -42,8 +42,9 @@ public class IgValidationTests {
 	private static final Logger log = LoggerFactory.getLogger(IgValidationTests.class);
 
 	private static final String EMED = "https://fhir.ch/ig/ch-emed/6.0.0/package.tgz";
-	private static final List<String> IGS = List.of(
+	private static final List<String> IGS = List.of(		
 		"https://fhir.ch/ig/ch-core/6.0.0/package.tgz",
+		"https://hl7.org/fhir/extensions/5.3.0-ballot-tc1/package.tgz",
 		EMED
 	);
 
