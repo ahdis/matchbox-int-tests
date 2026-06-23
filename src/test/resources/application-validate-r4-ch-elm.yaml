@@ -61,8 +61,8 @@ hapi:
       ch-elm:
         name: ch.fhir.ig.ch-elm
         version: 1.14.0
-        # url: https://fhir.ch/ig/ch-elm/package.tgz
-        url: https://build.fhir.org/ig/ahdis/ch-elm/package.tgz
+        url: https://fhir.ch/ig/ch-elm/1.14.0/package.tgz
+        #url: https://build.fhir.org/ig/ahdis/ch-elm/package.tgz
         # always provide url, otherwise integration tests will fail
 matchbox:
   fhir:
@@ -70,11 +70,11 @@ matchbox:
       txServer: http://localhost:${server.port}/matchboxv3/tx
       #      txServer: http://tx.fhir.org
       #      txServer: n/a
-#      igsPreloaded: ch.fhir.ig.ch-elm#1.9.0-ci-build
+      #      igsPreloaded: ch.fhir.ig.ch-elm#1.9.0-ci-build
       httpReadOnly: true
       igsPreloaded: ch.fhir.ig.ch-elm#1.14.0
       txUseEcosystem: false
-       #txServerCache: false
+      #txServerCache: false
       #txServer: n/a
       suppressWarnInfo:
         hl7.fhir.r4.core#4.0.1:
@@ -87,4 +87,8 @@ matchbox:
           - "regex:This element does not match any known slice defined in the profile http://hl7.eu/fhir/laboratory/StructureDefinition/HumanName-eu(.+)"
           - "regex:Does not match slice '(.+)' (.+)"
           - "regex:(.+)Unable to find a match for profile(.+)"
-          - "regex:(.+): Specified profile type was '(.+)' in profile '(.+)', but found type '(.+)"      
+          - "regex:(.+): Specified profile type was '(.+)' in profile '(.+)', but found type '(.+)"
+logging:
+  level:
+    root: INFO
+    #health.matchbox.server: DEBUG

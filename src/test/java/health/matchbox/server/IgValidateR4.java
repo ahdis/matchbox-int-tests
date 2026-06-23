@@ -1,14 +1,12 @@
 package health.matchbox.server;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.jpa.packages.loader.PackageLoaderSvc;
 import ca.uhn.fhir.jpa.starter.AppProperties;
 import ch.ahdis.matchbox.engine.MatchboxEngine;
 import ch.ahdis.matchbox.util.PackageCacheInitializer;
 import health.matchbox.util.ValidationClient;
 import org.hl7.fhir.exceptions.FHIRFormatError;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Resource;
@@ -40,8 +38,7 @@ import static health.matchbox.util.ValidationUtil.getValidationFailures;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * see https://www.baeldung.com/springjunit4classrunner-parameterized read the
- * implementation guides defined in ig and
+ * see https://www.baeldung.com/springjunit4classrunner-parameterized read the implementation guides defined in ig and
  * execute the validations
  * <p>
  * It uses the port 8082.
@@ -79,7 +76,6 @@ abstract public class IgValidateR4 {
 	}
 
 	public Stream<Arguments> provideResources() throws Exception {
-
 		String propertyString = "";
 		ActiveProfiles classAnnotation = this.getClass().getAnnotation(ActiveProfiles.class);
 		if (classAnnotation != null) {
@@ -94,10 +90,12 @@ abstract public class IgValidateR4 {
 		final List<AppProperties.ImplementationGuide> igs = PackageCacheInitializer.getIgs(obj, true);
 		List<Arguments> arguments = new ArrayList<>();
 		for (AppProperties.ImplementationGuide ig : igs) {
+			log.debug("fetching resources for ig " + ig.getName() + " from " + ig.getUrl());
 			Map<String, byte[]> source = fetchByPackage(ig, true);
 			String version = "4.0.1";
 			for (Map.Entry<String, byte[]> t : source.entrySet()) {
 				String fn = t.getKey();
+				log.debug("processing " + fn);
 				if (!exemptFile(fn, ig.getName())) {
 					Resource r = null;
 					if (fn.endsWith(".xml") && !fn.endsWith("template.xml"))
@@ -141,6 +139,10 @@ abstract public class IgValidateR4 {
 				}
 			}
 		}
+		if (arguments.isEmpty()) {
+			throw new IllegalStateException("No resources found for validation. Check the implementation guide " +
+														  "configuration for profile '%s'.".formatted(propertyString));
+		}
 		return arguments.stream();
 	}
 
@@ -154,9 +156,18 @@ abstract public class IgValidateR4 {
 		if (fails > 0) {
 			String responseInJson = new org.hl7.fhir.r4.formats.JsonParser().composeString(outcome);
 			String resourceInJson = new org.hl7.fhir.r4.formats.JsonParser().composeString(resource);
+			for (final var issue : outcome.getIssue()) {
+				if (issue.getSeverity() == OperationOutcome.IssueSeverity.ERROR || issue.getSeverity() == OperationOutcome.IssueSeverity.FATAL) {
+					log.error("[{}][{}] {} {}",
+					          issue.getSeverity().getDisplay(),
+					          issue.getCode().getDisplay(),
+					          issue.getDiagnostics(),
+					          issue.getDetails().getText());
+				}
+			}
 			assertEquals(0,
-							 fails,
-							 "Validation Errors " + fails + "\noutcome:\n" + responseInJson + "\nresource\n" + resourceInJson);
+			             fails,
+			             "Validation Errors " + fails + "\noutcome:\n" + responseInJson + "\nresource\n" + resourceInJson);
 		}
 		assertEquals(0, fails);
 	}
@@ -213,8 +224,8 @@ abstract public class IgValidateR4 {
 							String result = engine.evaluateFhirPath(responseInJson, true, expressionFhirPath);
 							log.debug("expression: " + expressionFhirPath + " result: " + result);
 							assertEquals(action.getAssert().getValue(),
-											 result,
-											 "expression:\n" + expressionFhirPath + "\nresource:\n" + responseInJson);
+							             result,
+							             "expression:\n" + expressionFhirPath + "\nresource:\n" + responseInJson);
 							continue;
 						} catch (ca.uhn.fhir.fhirpath.FhirPathExecutionException e) {
 							fail("error evaluating expression " + expressionFhirPath + e.getMessage());
