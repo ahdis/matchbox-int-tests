@@ -68,6 +68,7 @@ matchbox:
   fhir:
     context:
       txServer: http://localhost:${server.port}/matchboxv3/tx
+      ssrfProtectionEnabled: false # Needed for the localhost TX URL
       #      txServer: http://tx.fhir.org
       #      txServer: n/a
       #      igsPreloaded: ch.fhir.ig.ch-elm#1.9.0-ci-build
