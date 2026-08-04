@@ -1,0 +1,69 @@
+hapi:
+  fhir:
+    implementationguides:
+      fhir_r4_core:
+        name: hl7.fhir.r4.core
+        version: 4.0.1
+        url: classpath:/hl7.fhir.r4.core.tgz
+      fhir_terminology:
+        name: hl7.terminology.r4
+        version: 7.0.1
+        url: classpath:/hl7.terminology.r4#7.0.1.tgz
+      fhir_extensions:
+        name: hl7.fhir.uv.extensions.r4
+        version: 5.2.0
+        url: classpath:/hl7.fhir.uv.extensions.r4#5.2.0.tgz
+      tddui:
+        name: ans.fhir.fr.tddui
+        version: 2.4.0-tru
+        url: https://ansforge.github.io/IG-fhir-medicosocial-transfert-donnees-dui/fix-invariant/ig/package.tgz
+        #fr_core2:
+        #name: hl7.fhir.fr.core
+        #version: 2.0.1
+matchbox:
+  fhir:
+    context:
+      fhirVersion: 4.0.1
+      #txServer: n/a
+      #txServer: http://tx.fhir.org
+      #txServer: http://localhost:8081/proxy/tx/matchboxv3/tx/
+      #txServer: http://localhost:18002/eprik-cara/camel/matchboxv3/
+      #txServer: http://localhost:18002/eprik-cara/camel/frtx/fhir/
+      txServer: http://localhost:8084/matchboxv3/tx/
+      #txServer: https://smt.esante.gouv.fr/fhir/
+
+      httpReadOnly: false
+      onlyOneEngine: false
+      ssrfProtectionEnabled: false
+      suppressWarnInfoDeactivated:
+        hl7.fhir.r4.core#4.0.1:
+          - "Constraint failed: dom-6:"
+          - "regex:Entry '(.+)' isn't reachable by traversing forwards from the Composition"
+        ch.fhir.ig.ch-elm##1.0.0:
+          - "regex:Binding for path (.+) has no source, so can't be checked"
+logging:
+  level:
+    root: INFO
+    ch.ahdis.matchbox: TRACE
+    ch.ahdis.matchbox.IgLoaderFromJpaPackageCache: TRACE
+    ch.ahdis.matchbox.terminology: DEBUG
+    ca.uhn.fhir.jpa.packages.JpaPackageCache: ERROR
+    ch.ahdis.fhir.hapi.jpa.validation: DEBUG
+    #org.hl7.fhir.convertors.txClient: TRACE
+    #org.springframework.web: DEBUG
+    #org.hl7.fhir.r4.utils.client: TRACE
+    fhirtest.access: ERROR
+    fhirtest.request: ERROR
+spring:
+  datasource:
+    url: "jdbc:h2:file:./database/h2_ans_tddui"
+  h2:
+    console:
+      #enabled: true
+      settings:
+        web-allow-others: true
+        trace: false
+server:
+  port: 8084
+  servlet:
+    context-path: /matchboxv3
