@@ -60,9 +60,9 @@ hapi:
     implementationguides:
       ch-elm:
         name: ch.fhir.ig.ch-elm
-        version: 1.14.0
-        url: https://fhir.ch/ig/ch-elm/1.14.0/package.tgz
-        #url: https://build.fhir.org/ig/ahdis/ch-elm/package.tgz
+        version: 1.15.1
+        url: https://fhir.ch/ig/ch-elm/package.tgz
+#        url: https://build.fhir.org/ig/ahdis/ch-elm/package.tgz
         # always provide url, otherwise integration tests will fail
 matchbox:
   fhir:
@@ -73,7 +73,7 @@ matchbox:
       #      txServer: n/a
       #      igsPreloaded: ch.fhir.ig.ch-elm#1.9.0-ci-build
       httpReadOnly: true
-      igsPreloaded: ch.fhir.ig.ch-elm#1.14.0
+      igsPreloaded: ch.fhir.ig.ch-elm#1.15.1
       txUseEcosystem: false
       #txServerCache: false
       #txServer: n/a
