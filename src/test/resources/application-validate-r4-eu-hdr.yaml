@@ -1,0 +1,36 @@
+hapi:
+  fhir:
+    implementationguides:
+      hdr:
+        name: hl7.fhir.eu.hdr
+        version: 0.1.0-ballot
+matchbox:
+  fhir:
+    context:
+      fhirVersion: 4.0.1
+      txServer: http://localhost:8084/matchboxv3/tx/
+      httpReadOnly: false
+      onlyOneEngine: false
+      ssrfProtectionEnabled: false
+      suppressWarnInfoDeactivated:
+        hl7.fhir.r4.core#4.0.1:
+          - "Constraint failed: dom-6:"
+logging:
+  level:
+    root: INFO
+    ch.ahdis.matchbox: INFO
+    ca.uhn.fhir.jpa.packages.JpaPackageCache: ERROR
+    fhirtest.access: ERROR
+    fhirtest.request: ERROR
+spring:
+  datasource:
+    url: "jdbc:h2:file:./database/h2_eu_hdr"
+  h2:
+    console:
+      settings:
+        web-allow-others: true
+        trace: false
+server:
+  port: 8084
+  servlet:
+    context-path: /matchboxv3

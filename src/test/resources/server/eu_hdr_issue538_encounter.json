@@ -1,0 +1,56 @@
+{
+                "resourceType": "Encounter",
+                "id": "2026H0001",
+                "meta": {
+                    "source": "clinicaiSalus"
+                },
+                "text": {
+                    "status": "generated",
+                    "div": "<div xmlns='http://www.w3.org/1999/xhtml'><p>Encounter 2026H0001: </p><p>Class: inpatient encounter.</p><p>Service: Obstetrics.</p><p>Reason: Pain localized to upper abdomen.</p><p>Discharge Disposition: Home.</p><p>Start date: 2020-01-04.</p><p>End date: 2020-01-15.</p></div>"
+                },
+                "identifier": [{
+                        "system": "https://ips.isalus.es/identifiers/Encounter/id",
+                        "value": "2026H0001"
+                    }
+                ],
+                "status": "finished",
+                "class": {
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+                    "code": "IMP",
+                    "display": "inpatient encounter"
+                },
+                "serviceType": {
+                    "coding": [{
+                            "system": "http://terminology.hl7.org/CodeSystem/service-type",
+                            "code": "482",
+                            "display": "Obstetrics"
+                        }
+                    ]
+                },
+                "subject": {
+                    "reference": "Patient/579870"
+                },
+                "period": {
+                    "start": "2020-01-04",
+                    "end": "2020-01-15"
+                },
+                "reasonCode": [{
+                        "coding": [{
+                                "system": "http://hl7.org/fhir/sid/icd-10",
+                                "code": "R10.1",
+                                "display": "Pain localized to upper abdomen"
+                            }
+                        ]
+                    }
+                ],
+                "hospitalization": {
+                    "dischargeDisposition": {
+                        "coding": [{
+                                "system": "http://terminology.hl7.org/CodeSystem/discharge-disposition",
+                                "code": "home",
+                                "display": "Home"
+                            }
+                        ]
+                    }
+                }
+            }
