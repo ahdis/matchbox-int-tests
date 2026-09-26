@@ -8,6 +8,8 @@ package health.matchbox.server;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.starter.Application;
+import ch.ahdis.matchbox.util.MatchboxEngineSupport;
+import health.matchbox.util.ServerStartup;
 import health.matchbox.util.ValidationUtil;
 import org.apache.commons.io.FileUtils;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
@@ -15,6 +17,7 @@ import org.hl7.fhir.r4.model.OperationOutcome;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.core.io.ClassPathResource;
@@ -42,12 +45,12 @@ public class IgValidateRawProfileTest {
 
 	private final String targetServer = "http://localhost:8081/matchboxv3/fhir";
 
+	@Autowired
+	private MatchboxEngineSupport matchboxEngineSupport;
+
 	@BeforeAll
 	void waitUntilStartup() throws Exception {
-		Thread.sleep(30000); // give the server some time to start up
-		final FhirContext contextR4 = FhirContext.forR4Cached();
-		final var validationClient = new ValidationClient(contextR4, this.targetServer);
-		validationClient.capabilities();
+		ServerStartup.awaitServerReady(this.targetServer, this.matchboxEngineSupport);
 	}
 
 	@Test

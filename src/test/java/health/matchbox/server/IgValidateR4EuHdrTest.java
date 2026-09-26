@@ -2,12 +2,15 @@ package health.matchbox.server;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.starter.Application;
+import ch.ahdis.matchbox.util.MatchboxEngineSupport;
+import health.matchbox.util.ServerStartup;
 import health.matchbox.util.ValidationUtil;
 import org.apache.commons.io.FileUtils;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -40,11 +43,13 @@ public class IgValidateR4EuHdrTest {
 	private ValidationClient validationClient;
 	private final FhirContext contextR4 = FhirContext.forR4Cached();
 
+	@Autowired
+	private MatchboxEngineSupport matchboxEngineSupport;
+
 	@BeforeAll
 	void waitUntilStartup() throws Exception {
-		Thread.sleep(30000); // give the server some time to start up
+		ServerStartup.awaitServerReady(this.targetServer, this.matchboxEngineSupport);
 		this.validationClient = new ValidationClient(this.contextR4, this.targetServer);
-		this.validationClient.capabilities();
 	}
 
 	@Test

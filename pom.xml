@@ -19,7 +19,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>21</java.version>
-        <matchbox.version>4.1.12</matchbox.version>
+        <matchbox.version>4.1.18</matchbox.version>
     </properties>
 
     <dependencyManagement>
@@ -135,7 +135,8 @@
                         <usePhrasedClassNameInRunning>true</usePhrasedClassNameInRunning>
                         <usePhrasedClassNameInTestCaseSummary>true</usePhrasedClassNameInTestCaseSummary>
                     </statelessTestsetInfoReporter>
-                    <argLine>-Xmx8g -Xms2g -XX:MaxMetaspaceSize=1g</argLine>
+                    <!-- string deduplication, see ahdis/matchbox#597: the IG packages loaded in several versions contain a lot of identical text -->
+                    <argLine>-Xmx8g -Xms2g -XX:MaxMetaspaceSize=1g -XX:+UseStringDeduplication</argLine>
                 </configuration>
                 <executions>
                     <execution>
