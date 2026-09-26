@@ -4,7 +4,9 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.packages.loader.PackageLoaderSvc;
 import ca.uhn.fhir.jpa.starter.AppProperties;
 import ch.ahdis.matchbox.engine.MatchboxEngine;
+import ch.ahdis.matchbox.util.MatchboxEngineSupport;
 import ch.ahdis.matchbox.util.PackageCacheInitializer;
+import health.matchbox.util.ServerStartup;
 import health.matchbox.util.ValidationClient;
 import org.hl7.fhir.exceptions.FHIRFormatError;
 import org.hl7.fhir.r4.model.Binary;
@@ -52,17 +54,26 @@ abstract public class IgValidateR4 {
 	private static final Logger log = LoggerFactory.getLogger(IgValidateR4.class);
 	@Autowired
 	ApplicationContext context;
-	private static ValidationClient validationClient;
+	@Autowired
+	private MatchboxEngineSupport matchboxEngineSupport;
+	private ValidationClient validationClient;
 
-	private static MatchboxEngine engine;
+	/**
+	 * Only used to evaluate the FHIRPath assertions of the TestScripts, created on first use.
+	 */
+	private MatchboxEngine engine;
 
 	@BeforeAll
-	public static synchronized void beforeAll() throws Exception {
-		Thread.sleep(40000); // give the server some time to start up
-		FhirContext contextR4 = FhirContext.forR4Cached();
-		validationClient = new ValidationClient(contextR4, TARGET_SERVER);
-		validationClient.capabilities();
-		engine = getEngine();
+	void waitUntilStartup() throws Exception {
+		ServerStartup.awaitServerReady(TARGET_SERVER, this.matchboxEngineSupport);
+		this.validationClient = new ValidationClient(FhirContext.forR4Cached(), TARGET_SERVER);
+	}
+
+	private synchronized MatchboxEngine getFhirPathEngine() throws IOException, URISyntaxException {
+		if (this.engine == null) {
+			this.engine = getEngine();
+		}
+		return this.engine;
 	}
 
 	private static MatchboxEngine getEngine() throws IOException, URISyntaxException {
@@ -221,7 +232,7 @@ abstract public class IgValidateR4 {
 					if (action.getAssert().hasExpression()) {
 						String expressionFhirPath = action.getAssert().getExpression();
 						try {
-							String result = engine.evaluateFhirPath(responseInJson, true, expressionFhirPath);
+							String result = this.getFhirPathEngine().evaluateFhirPath(responseInJson, true, expressionFhirPath);
 							log.debug("expression: " + expressionFhirPath + " result: " + result);
 							assertEquals(action.getAssert().getValue(),
 							             result,
