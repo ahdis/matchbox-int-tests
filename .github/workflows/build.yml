@@ -24,5 +24,27 @@ jobs:
           distribution: "zulu"
           cache: "maven"
 
+      # matchbox-server is not published to Maven Central, so the latest matchbox release is built and installed
+      # in the local Maven repository (without the boot profile, see README.md)
+      - name: Find the latest matchbox release
+        id: matchbox
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: echo "tag=$(gh release view --repo ahdis/matchbox --json tagName --jq .tagName)" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout matchbox ${{ steps.matchbox.outputs.tag }}
+        uses: actions/checkout@v7
+        with:
+          repository: ahdis/matchbox
+          ref: ${{ steps.matchbox.outputs.tag }}
+          path: matchbox
+          persist-credentials: false
+
+      - name: Install matchbox
+        working-directory: matchbox
+        run: |
+          mvn --batch-mode --no-transfer-progress -DskipTests -P '!boot' -pl matchbox-engine,matchbox-server -am install
+          echo "MATCHBOX_VERSION=$(mvn --batch-mode --no-transfer-progress -q help:evaluate -Dexpression=project.version -DforceStdout)" >> "$GITHUB_ENV"
+
       - name: Build the project
-        run: mvn --batch-mode --no-transfer-progress --update-snapshots -DskipTests -Dmatchbox.version=4.1.10 site
+        run: mvn --batch-mode --no-transfer-progress --update-snapshots -DskipTests -Dmatchbox.version=${MATCHBOX_VERSION} site
