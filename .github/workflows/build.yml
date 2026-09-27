@@ -2,13 +2,14 @@ name: Build the project
 
 on:
   pull_request:
-    branches: [ main ]
+    branches: [ master ]
   push:
-    branches: [ main ]
+    branches: [ master ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -24,5 +25,38 @@ jobs:
           distribution: "zulu"
           cache: "maven"
 
-      - name: Build the project
-        run: mvn --batch-mode --no-transfer-progress --update-snapshots -DskipTests -Dmatchbox.version=4.1.10 site
+      # matchbox-server is not published to Maven Central, so the latest matchbox release is built and installed
+      # in the local Maven repository (without the boot profile, see README.md)
+      - name: Find the latest matchbox release
+        id: matchbox
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: echo "tag=$(gh release view --repo ahdis/matchbox --json tagName --jq .tagName)" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout matchbox ${{ steps.matchbox.outputs.tag }}
+        uses: actions/checkout@v7
+        with:
+          repository: ahdis/matchbox
+          ref: ${{ steps.matchbox.outputs.tag }}
+          path: matchbox
+          persist-credentials: false
+
+      - name: Install matchbox
+        working-directory: matchbox
+        run: |
+          mvn --batch-mode --no-transfer-progress -DskipTests -P '!boot' -pl matchbox-engine,matchbox-server -am install
+          echo "MATCHBOX_VERSION=$(mvn --batch-mode --no-transfer-progress -q help:evaluate -Dexpression=project.version -DforceStdout)" >> "$GITHUB_ENV"
+
+      # the site runs the tests (surefire report); a failing test fails the build
+      - name: Build the project and run the tests
+        run: mvn --batch-mode --no-transfer-progress --update-snapshots -Dmatchbox.version=${MATCHBOX_VERSION} site
+
+      - name: Upload the test reports
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: test-reports
+          path: |
+            target/site/
+            target/surefire-reports/
+          if-no-files-found: ignore
