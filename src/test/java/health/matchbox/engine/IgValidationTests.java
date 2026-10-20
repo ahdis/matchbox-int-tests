@@ -173,9 +173,12 @@ public class IgValidationTests {
 		Map<String, byte[]> res = new HashMap<>();
 		if (pi != null) {
 			if (examples) {
-				for (String s : pi.list("example")) {
-					if (process(s)) {
-						res.put(s, FileUtilities.streamToBytes(pi.load("example", s)));
+				// IG Publisher builds may put the examples into 'examples' instead of 'example' (ch-elm CI build)
+				for (String folder : List.of("example", "examples")) {
+					for (String s : pi.list(folder)) {
+						if (process(s)) {
+							res.put(s, FileUtilities.streamToBytes(pi.load(folder, s)));
+						}
 					}
 				}
 			} else {
